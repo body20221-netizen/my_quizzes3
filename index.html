@@ -1,0 +1,2779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programming II — Final Exam Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #00d4aa;
+    --accent2: #0094ff;
+    --accent3: #ff6b35;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-muted: #475569;
+    --correct: #22c55e;
+    --wrong: #ef4444;
+    --code-bg: #0d1117;
+    --code-kw: #ff79c6;
+    --code-str: #f1fa8c;
+    --code-num: #bd93f9;
+    --code-type: #8be9fd;
+    --code-fn: #50fa7b;
+    --code-comment: #6272a4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID NOISE BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,26,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700; font-size: 14px; color: #0a0e1a;
+  }
+  .header-title { font-size: 1rem; font-weight: 700; letter-spacing: .5px; }
+  .header-subtitle { font-size: .7rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+  .header-stats {
+    display: flex; gap: 24px; align-items: center;
+  }
+  .stat-chip {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 4px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: .7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
+  }
+  .stat-chip span { font-size: 1.1rem; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── MAIN LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    gap: 2rem;
+    position: relative; z-index: 1;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar { position: sticky; top: 84px; height: fit-content; }
+  .sidebar-label {
+    font-size: .65rem; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: .75rem; padding-left: 4px;
+  }
+  .lecture-nav { display: flex; flex-direction: column; gap: 4px; }
+  .lec-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .2s;
+    text-align: left; width: 100%;
+    font-family: 'Syne', sans-serif; font-size: .8rem; font-weight: 600;
+  }
+  .lec-btn:hover { background: var(--surface); border-color: var(--border); color: var(--text); }
+  .lec-btn.active {
+    background: rgba(0,212,170,.1);
+    border-color: rgba(0,212,170,.3);
+    color: var(--accent);
+  }
+  .lec-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+  .lec-btn.active .lec-num { background: var(--accent); color: #0a0e1a; }
+  .lec-progress {
+    height: 3px; border-radius: 2px; background: var(--surface2);
+    margin-top: 2px;
+  }
+  .lec-progress-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s ease;
+  }
+  .lec-score {
+    font-size: .65rem; font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted); margin-left: auto;
+  }
+
+  .sidebar-divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+  .overall-score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .overall-score-card .big-score {
+    font-size: 2.5rem; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .overall-score-card .score-label { font-size: .7rem; color: var(--text-dim); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* ── MAIN CONTENT ── */
+  .main-content { min-width: 0; }
+
+  /* ── LECTURE SECTION ── */
+  .lecture-section { display: none; }
+  .lecture-section.active { display: block; }
+
+  .lecture-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .lecture-icon {
+    width: 56px; height: 56px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+  }
+  .lecture-meta { flex: 1; }
+  .lecture-num-label { font-size: .65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 4px; }
+  .lecture-main-title { font-size: 1.3rem; font-weight: 800; }
+  .lecture-tag {
+    display: inline-block; margin-top: 6px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: .65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .lecture-progress-bar {
+    height: 6px; background: var(--surface2); border-radius: 4px; overflow: hidden; margin-top: 12px;
+  }
+  .lecture-progress-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .5s ease;
+  }
+  .lecture-stats { display: flex; gap: 16px; margin-top: 10px; }
+  .lecture-stat { font-size: .7rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+  .lecture-stat strong { color: var(--text); }
+
+  /* ── QUESTION CARD ── */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 1.25rem;
+    transition: border-color .2s;
+  }
+  .question-card:hover { border-color: rgba(0,212,170,.2); }
+
+  .q-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  }
+  .q-num {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, rgba(0,212,170,.2), rgba(0,148,255,.2));
+    border: 1px solid rgba(0,212,170,.3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .q-text { font-size: .95rem; font-weight: 600; line-height: 1.5; color: var(--text); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+    tab-size: 4;
+    position: relative;
+  }
+  .code-block::before {
+    content: 'Java';
+    position: absolute; top: 8px; right: 12px;
+    font-size: .6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;
+  }
+  .kw { color: var(--code-kw); }
+  .ty { color: var(--code-type); }
+  .fn { color: var(--code-fn); }
+  .st { color: var(--code-str); }
+  .nm { color: var(--code-num); }
+  .cm { color: var(--code-comment); }
+  .op { color: #ff79c6; }
+
+  /* ── OPTIONS ── */
+  .options { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .15s;
+    text-align: left; width: 100%;
+    font-family: 'Syne', sans-serif; font-size: .85rem; color: var(--text-dim);
+  }
+  .option-btn:not(.selected):not(.correct):not(.wrong):hover {
+    background: rgba(0,212,170,.05);
+    border-color: rgba(0,212,170,.3);
+    color: var(--text);
+  }
+  .opt-letter {
+    width: 26px; height: 26px; flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all .15s;
+  }
+  .option-btn:not(.selected):not(.correct):not(.wrong):hover .opt-letter {
+    background: rgba(0,212,170,.2); border-color: var(--accent); color: var(--accent);
+  }
+  .option-btn.selected {
+    background: rgba(0,148,255,.08); border-color: rgba(0,148,255,.5); color: var(--text);
+  }
+  .option-btn.selected .opt-letter { background: var(--accent2); color: white; border-color: var(--accent2); }
+  .option-btn.correct {
+    background: rgba(34,197,94,.1); border-color: var(--correct); color: var(--text);
+  }
+  .option-btn.correct .opt-letter { background: var(--correct); color: white; border-color: var(--correct); }
+  .option-btn.wrong {
+    background: rgba(239,68,68,.1); border-color: var(--wrong); color: var(--text);
+  }
+  .option-btn.wrong .opt-letter { background: var(--wrong); color: white; border-color: var(--wrong); }
+  .option-btn.disabled { cursor: default; pointer-events: none; }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    display: none; margin-top: 12px;
+    padding: 12px 16px; border-radius: 8px;
+    font-size: .82rem; line-height: 1.6;
+  }
+  .feedback.show { display: flex; align-items: flex-start; gap: 10px; }
+  .feedback.correct-fb { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3); color: #86efac; }
+  .feedback.wrong-fb { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; }
+  .feedback-icon { flex-shrink: 0; font-size: 1rem; }
+
+  /* ── Q FOOTER ── */
+  .q-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .q-status { font-size: .72rem; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+  .q-status.answered-correct { color: var(--correct); }
+  .q-status.answered-wrong { color: var(--wrong); }
+
+  /* ── RESULT BADGE ── */
+  .result-badge {
+    display: none; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+  }
+  .result-badge.show { display: inline-flex; }
+  .result-badge.pass { background: rgba(34,197,94,.15); color: var(--correct); }
+  .result-badge.fail { background: rgba(239,68,68,.15); color: var(--wrong); }
+
+  /* ── SECTION RESULT ── */
+  .section-result {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+  .section-result .result-score { font-size: 3rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+  .section-result .result-label { font-size: .8rem; color: var(--text-dim); margin-top: 6px; }
+  .section-result .result-message { margin-top: 16px; font-size: .9rem; color: var(--text-dim); }
+
+  /* ── NAVIGATION BUTTONS ── */
+  .nav-buttons { display: flex; gap: 12px; margin-top: 1.5rem; justify-content: flex-end; }
+  .btn {
+    padding: 10px 24px; border-radius: 8px; border: none;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0a0e1a;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,212,170,.3); }
+  .btn-secondary {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text-dim);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--text); }
+
+  /* ── GLOBAL PROGRESS ── */
+  .global-progress {
+    position: fixed; top: 64px; left: 0; right: 0;
+    height: 3px; background: var(--surface);
+    z-index: 99;
+  }
+  .global-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+    transition: width .5s ease;
+  }
+
+  /* ── WELCOME SCREEN ── */
+  #welcome {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: calc(100vh - 64px);
+    text-align: center; padding: 3rem;
+  }
+  #welcome.hidden { display: none; }
+  .welcome-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px; border-radius: 20px;
+    background: rgba(0,212,170,.1); border: 1px solid rgba(0,212,170,.3);
+    font-size: .75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 2rem;
+  }
+  .welcome-title {
+    font-size: 3.5rem; font-weight: 800; line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+  .welcome-title span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .welcome-desc { font-size: 1rem; color: var(--text-dim); max-width: 560px; line-height: 1.7; margin-bottom: 2.5rem; }
+  .welcome-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    max-width: 640px; width: 100%; margin-bottom: 3rem;
+  }
+  .welcome-stat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; text-align: center;
+  }
+  .welcome-stat .ws-num { font-size: 2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+  .welcome-stat .ws-label { font-size: .7rem; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .start-btn {
+    padding: 16px 48px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 12px;
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+    color: #0a0e1a; cursor: pointer;
+    transition: all .2s;
+    letter-spacing: .5px;
+  }
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,212,170,.4); }
+
+  /* ── FINAL RESULTS ── */
+  #final-results {
+    display: none;
+    flex-direction: column; align-items: center;
+    padding: 3rem; text-align: center;
+  }
+  #final-results.show { display: flex; }
+  .final-badge {
+    font-size: 4rem; margin-bottom: 1rem;
+  }
+  .final-score-big {
+    font-size: 5rem; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .final-subtitle { font-size: 1.1rem; color: var(--text-dim); margin: .5rem 0 2rem; }
+  .lecture-results-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    max-width: 700px; width: 100%; margin-bottom: 2rem;
+  }
+  .lec-result-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px;
+  }
+  .lrc-name { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .lrc-score { font-size: 1.5rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin: 4px 0; }
+  .lrc-bar { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .lrc-fill { height: 100%; border-radius: 2px; transition: width .8s ease; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    .lecture-nav { flex-direction: row; flex-wrap: wrap; }
+    .lec-btn { flex: 1; min-width: 100px; justify-content: center; }
+    .welcome-title { font-size: 2.2rem; }
+    .welcome-grid { grid-template-columns: repeat(3, 1fr); }
+    .lecture-results-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .question-card { animation: fadeIn .3s ease both; }
+  .question-card:nth-child(2) { animation-delay: .05s; }
+  .question-card:nth-child(3) { animation-delay: .1s; }
+  .question-card:nth-child(4) { animation-delay: .15s; }
+  .question-card:nth-child(5) { animation-delay: .2s; }
+  .question-card:nth-child(6) { animation-delay: .25s; }
+  .question-card:nth-child(7) { animation-delay: .3s; }
+  .question-card:nth-child(8) { animation-delay: .35s; }
+  .question-card:nth-child(9) { animation-delay: .4s; }
+  .question-card:nth-child(10) { animation-delay: .45s; }
+
+  @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .feedback.show { animation: popIn .2s ease; }
+
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .6; } }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo">PII</div>
+    <div>
+      <div class="header-title">Programming II</div>
+      <div class="header-subtitle">Final Exam Preparation Quiz</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-chip"><span id="hdr-answered">0</span>Answered</div>
+    <div class="stat-chip"><span id="hdr-correct">0</span>Correct</div>
+    <div class="stat-chip"><span id="hdr-score">0%</span>Score</div>
+  </div>
+</header>
+
+<!-- GLOBAL PROGRESS -->
+<div class="global-progress"><div class="global-progress-fill" id="global-progress" style="width:0%"></div></div>
+
+<!-- WELCOME SCREEN -->
+<div id="welcome">
+  <div class="welcome-badge">📘 Programming II · Java</div>
+  <h1 class="welcome-title">Final Exam<br><span>Quiz Practice</span></h1>
+  <p class="welcome-desc">
+    Test your Java mastery across 9 core lectures. Every question is a <strong>code trace.
+  </p>
+  <div class="welcome-grid">
+    <div class="welcome-stat"><div class="ws-num">9</div><div class="ws-label">Lectures</div></div>
+    <div class="welcome-stat"><div class="ws-num">120</div><div class="ws-label">Questions</div></div>
+    <div class="welcome-stat"><div class="ws-num">100%</div><div class="ws-label">Code Trace</div></div>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">▶ Start Quiz</button>
+</div>
+
+<!-- QUIZ LAYOUT -->
+<div class="layout" id="quiz-layout" style="display:none">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Lectures</div>
+    <nav class="lecture-nav" id="lecture-nav"></nav>
+    <hr class="sidebar-divider">
+    <div class="overall-score-card">
+      <div class="big-score" id="sidebar-score">0%</div>
+      <div class="score-label">Overall Score</div>
+      <div class="lecture-progress-bar" style="margin-top:12px">
+        <div class="lecture-progress-fill" id="sidebar-progress" style="width:0%"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content" id="main-content"></main>
+</div>
+
+<!-- FINAL RESULTS -->
+<div id="final-results">
+  <div class="final-badge" id="final-badge">🎓</div>
+  <div class="final-score-big" id="final-score-pct">0%</div>
+  <div class="final-subtitle" id="final-msg">Quiz Complete!</div>
+  <div class="lecture-results-grid" id="lec-results-grid"></div>
+  <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem">🔄 Restart Quiz</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  QUIZ DATA — 9 Lectures × 10 Questions Each
+// ═══════════════════════════════════════════════════
+const lectures = [
+  {
+    id: 1,
+    title: "Methods (Functions)",
+    icon: "⚙️",
+    color: "#00d4aa",
+    tag: "L01",
+    questions: [
+      {
+        q:"What is printed?",
+        code:`<span class="kw">public static void</span> <span class="fn">swap</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) {
+    <span class="ty">int</span> temp = a;
+    a = b;
+    b = temp;
+    <span class="cm"></span>
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">int</span> x = <span class="nm">5</span>, y = <span class="nm">10</span>;
+    <span class="fn">swap</span>(x, y);
+    System.out.<span class="fn">println</span>(x + <span class="st">" "</span> + y);
+}`,
+        options:["10 5","5 10","5 5","10 10"],
+        correct:1,
+        explain:"Java passes primitives by value. swap() receives copies of x and y. Swapping a and b inside swap() does not affect the originals. x stays 5, y stays 10 → prints \"5 10\"."
+      },
+      {
+        q:'What does countVowels("hello") return?',
+        code:`<span class="kw">public static int</span> <span class="fn">countVowels</span>(<span class="ty">String</span> s) {
+    <span class="ty">int</span> count = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; s.<span class="fn">length</span>(); i++) {
+        <span class="ty">char</span> c = s.<span class="fn">charAt</span>(i);
+        <span class="kw">if</span> (c == <span class="st">'a'</span> | c == <span class="st">'e'</span> | c == <span class="st">'i'</span> | c == <span class="st">'o'</span> | c == <span class="st">'u'</span>)
+            count++;
+    }
+    <span class="kw">return</span> count;
+}
+<span class="cm">// main: System.out.println(countVowels("hello"));</span>`,
+        options:["1","2","3","0"],
+        correct:1,
+        explain:'"hello": h, e, l, l, o. Vowels found: e (index 1) and o (index 4). count = 2. Note: | is bitwise OR — it evaluates all conditions but works correctly here since the result is the same as ||.'
+      },
+      {
+        q:"What is the output?",
+        code:`<span class="kw">public static double</span> <span class="fn">average</span>(<span class="ty">int</span>[] arr) {
+    <span class="ty">int</span> sum = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="ty">int</span> v : arr) sum += v;
+    <span class="kw">return</span> (<span class="ty">double</span>) sum / arr.length;
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">int</span>[] a = {<span class="nm">4</span>, <span class="nm">8</span>, <span class="nm">6</span>};   <span class="cm"></span>
+    System.out.<span class="fn">println</span>(<span class="fn">average</span>(a));
+}`,
+        options:["Compile error","18.0","4.0","6.0"],
+        correct:3,
+        explain:"({4,8,6}), sum=18, length=3, result=6.0."
+      },
+      {
+        q:"What is the output of mystery(1234)?",
+        code:`<span class="kw">public static int</span> <span class="fn">mystery</span>(<span class="ty">int</span> n) {
+    <span class="ty">int</span> result = <span class="nm">0</span>;
+    <span class="kw">while</span> (n > <span class="nm">0</span>) {
+        result = result * <span class="nm">10</span> + n % <span class="nm">10</span>;
+        n /= <span class="nm">10</span>;
+    }
+    <span class="kw">return</span> result;
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    System.out.<span class="fn">println</span>(<span class="fn">mystery</span>(<span class="nm">1234</span>));
+}`,
+        options:["1234","4321","4444","321"],
+        correct:1,
+        explain:"Each iteration extracts the last digit (n%10) and appends it: result=4 → 43 → 432 → 4321. n: 123 → 12 → 1 → 0. mystery(1234) reverses the digits → 4321."
+      },
+      {
+        q:"What is the exact output?",
+        code:`<span class="kw">public static void</span> <span class="fn">m1</span>() {
+    System.out.<span class="fn">print</span>(<span class="st">"A"</span>);
+    <span class="fn">m2</span>();
+    System.out.<span class="fn">print</span>(<span class="st">"B"</span>);
+}
+<span class="kw">public static void</span> <span class="fn">m2</span>() {
+    System.out.<span class="fn">print</span>(<span class="st">"C"</span>);
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="fn">m1</span>();
+}`,
+        options:["ACB","ABC","CAB","CBA"],
+        correct:0,
+        explain:"m1() runs: prints 'A', then calls m2() which prints 'C', then m2() returns and m1() continues printing 'B'. Output: \"ACB\"."
+      },
+      {
+        q:"What is the result?",
+        code:`<span class="kw">public static</span> <span class="ty">Boolean</span> <span class="fn">startsWith</span>(<span class="ty">String</span> s, <span class="ty">char</span> c) {
+    <span class="kw">return</span> s.<span class="fn">charAt</span>(<span class="nm">0</span>) == c;
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    System.out.<span class="fn">println</span>(
+        <span class="fn">startsWith</span>(<span class="st">"java"</span>, <span class="st">'j'</span>)
+        + <span class="st">" "</span>
+        + <span class="fn">startsWith</span>(<span class="st">"python"</span>, <span class="st">'j'</span>))  <span class="cm">// ⚠ 'j' + " " makes a String arg</span>
+    );
+}`,
+        options:["false true","true true","false false","true false"],
+        correct:3,
+        explain:"startsWith(\"java\",'j'): charAt(0)='j' == 'j' → true. startsWith(\"python\",'j'): charAt(0)='p' == 'j' → false. Concatenation: \"true\" + \" \" + \"false\" → prints \"true false\"."
+      },
+      {
+        q: "What is the output of the following program?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">compute</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) {
+    <span class="ty">int</span> result = a * b - a;
+    <span class="kw">return</span> result;
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">int</span> x = <span class="fn">compute</span>(<span class="nm">4</span>, <span class="nm">3</span>);
+    System.out.<span class="fn">println</span>(x);
+}`,
+        options: ["12", "8", "9", "4"],
+        correct: 1,
+        explain: "compute(4,3): result = 4×3 − 4 = 12 − 4 = 8"
+      },
+      {
+        q: "What is the output of the following program?",
+        code: `<span class="kw">public static void</span> <span class="fn">show</span>(<span class="ty">int</span> n) {
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; n; i++)
+        System.out.<span class="fn">print</span>(<span class="st">"#"</span>);
+    System.out.<span class="fn">println</span>();
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="fn">show</span>(<span class="nm">4</span>);
+    <span class="fn">show</span>(<span class="nm">2</span>);
+}`,
+        options: ["####\n##", "##\n####", "######", "####"],
+        correct: 0,
+        explain: "show(4) prints 4 hashes then newline; show(2) prints 2 hashes then newline."
+      },
+      {
+        q: "What does this program print?",
+        code: `<span class="kw">static</span> <span class="ty">int</span> x = <span class="nm">10</span>;
+
+<span class="kw">public static void</span> <span class="fn">change</span>() {
+    <span class="ty">int</span> x = <span class="nm">5</span>;          <span class="cm">// </span>
+    System.out.<span class="fn">println</span>(x);
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="fn">change</span>();
+    System.out.<span class="fn">println</span>(x);
+}`,
+        options: ["5\n5", "10\n10", "5\n10", "10\n5"],
+        correct: 2,
+        explain: "Inside change(), local x=5 shadows the global. After return, global x=10 is still unchanged."
+      },
+      {
+        q: "What is the output of this program?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">add</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) { <span class="kw">return</span> a + b; }
+<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">add</span>(<span class="ty">int</span> a, <span class="ty">int</span> b, <span class="ty">int</span> c) { <span class="kw">return</span> a + b + c; }
+
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    System.out.<span class="fn">println</span>(<span class="fn">add</span>(<span class="nm">2</span>, <span class="nm">3</span>));
+    System.out.<span class="fn">println</span>(<span class="fn">add</span>(<span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">4</span>));
+}`,
+        options: ["5\n9", "9\n5", "5\n5", "Compile error"],
+        correct: 0,
+        explain: "add(2,3) matches the 2-param version → 5. add(2,3,4) matches the 3-param version → 9."
+      },
+      {
+        q: "What does this print?",
+        code: `<span class="kw">public static void</span> <span class="fn">triple</span>(<span class="ty">int</span> n) {
+    n = n * <span class="nm">3</span>;
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">int</span> num = <span class="nm">7</span>;
+    <span class="fn">triple</span>(num);
+    System.out.<span class="fn">println</span>(num);
+}`,
+        options: ["21", "7", "14", "3"],
+        correct: 1,
+        explain: "int is a primitive — passed by value. Changes inside triple() do NOT affect the original variable num."
+      },
+      {
+        q: "What does this print?",
+        code: `<span class="kw">public static void</span> <span class="fn">doubleAll</span>(<span class="ty">int</span>[] arr) {
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; arr.length; i++)
+        arr[i] *= <span class="nm">2</span>;
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">int</span>[] nums = {<span class="nm">3</span>, <span class="nm">5</span>, <span class="nm">7</span>};
+    <span class="fn">doubleAll</span>(nums);
+    System.out.<span class="fn">println</span>(nums[<span class="nm">0</span>] + <span class="st">" "</span> + nums[<span class="nm">1</span>] + <span class="st">" "</span> + nums[<span class="nm">2</span>]);
+}`,
+        options: ["3 5 7", "6 10 14", "9 15 21", "6 5 7"],
+        correct: 1,
+        explain: "Arrays are passed by reference. doubleAll modifies the actual array. 3×2=6, 5×2=10, 7×2=14."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">square</span>(<span class="ty">int</span> n) { <span class="kw">return</span> n * n; }
+
+<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">sumSquares</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) {
+    <span class="kw">return</span> <span class="fn">square</span>(a) + <span class="fn">square</span>(b);
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    System.out.<span class="fn">println</span>(<span class="fn">sumSquares</span>(<span class="nm">3</span>, <span class="nm">4</span>));
+}`,
+        options: ["25", "7", "49", "12"],
+        correct: 0,
+        explain: "square(3)=9, square(4)=16. sumSquares returns 9+16=25."
+      },
+      {
+        q: "what is the output?",
+        code: `<span class="kw">public static void</span> <span class="fn">test</span>() {
+    <span class="ty">int</span> a = <span class="nm">5</span>;
+    {
+        <span class="ty">int</span> b = <span class="nm">10</span>;
+        a = a + b;
+    }
+    System.out.<span class="fn">println</span>(a);
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="fn">test</span>();
+}`,
+        options: ["5", "10", "15", "Compile error"],
+        correct: 2,
+        explain: "b is in inner block scope, but a is accessible in the outer block. a = 5+10 = 15."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">f</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n > <span class="nm">0</span>) <span class="kw">return</span> n + <span class="nm">1</span>;
+    <span class="kw">return</span> n - <span class="nm">1</span>;
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">int</span> r = <span class="fn">f</span>(<span class="fn">f</span>(<span class="nm">3</span>));
+    System.out.<span class="fn">println</span>(r);
+}`,
+        options: ["4", "5", "6", "1"],
+        correct: 1,
+        explain: "f(3): 3>0 so returns 3+1=4. Then f(4): 4>0 so returns 4+1=5."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">multiply</span>(<span class="ty">int</span> x, <span class="ty">int</span> y) { <span class="kw">return</span> x * y; }
+
+<span class="kw">public static void</span> <span class="fn">printResult</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) {
+    <span class="ty">int</span> res = <span class="fn">multiply</span>(a, b);
+    System.out.<span class="fn">println</span>(<span class="st">"Result: "</span> + res);
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="fn">printResult</span>(<span class="nm">6</span>, <span class="nm">7</span>);
+}`,
+        options: ["Result: 13", "Result: 42", "42", "Compile error"],
+        correct: 1,
+        explain: "multiply(6,7)=42. printResult prints 'Result: ' + 42 = 'Result: 42'."
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Objects and Classes",
+    icon: "📦",
+    color: "#0094ff",
+    tag: "L02",
+    questions: [
+      {
+        q:"How many distinct objects are created in heap memory?",
+        code:`<span class="ty">Car</span> c1;
+c1 = <span class="kw">new</span> <span class="fn">Car</span>();
+<span class="ty">Car</span> c2 = <span class="kw">new</span> <span class="fn">Car</span>();
+<span class="ty">Car</span> c3 = c1;`,
+        options:["1","2","3","4"],
+        correct:1,
+        explain:"'new Car()' is called twice (c1 and c2). c3 = c1 is just another reference to c1's object."
+      },
+      {
+        q:'What does this program print?',
+        code:`<span class="kw">class</span> <span class="ty">WordAnalyzer</span> {
+    <span class="kw">private</span> <span class="ty">String</span> word;
+    <span class="kw">public void</span> <span class="fn">setWord</span>(<span class="ty">String</span> w) { word = w; }
+    <span class="kw">public int</span> <span class="fn">countChar</span>(<span class="ty">char</span> c) {
+        <span class="ty">int</span> count = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; word.<span class="fn">length</span>(); i++)
+            <span class="kw">if</span> (word.<span class="fn">charAt</span>(i) == c) count++;
+        <span class="kw">return</span> count;
+    }
+}
+<span class="cm">// main:</span>
+<span class="ty">WordAnalyzer</span> wa = <span class="kw">new</span> <span class="fn">WordAnalyzer</span>();
+wa.<span class="fn">setWord</span>(<span class="st">"programming"</span>);
+System.out.<span class="fn">println</span>(wa.<span class="fn">countChar</span>(<span class="st">'g'</span>));`,
+        options:["1","2","3","0"],
+        correct:1,
+        explain:'"programming" contains \'g\' at position 3 and 10 -> count = 2.'
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Car</span> {
+    <span class="kw">private</span> <span class="ty">String</span> brand;
+    <span class="kw">private</span> <span class="ty">int</span> year;
+    <span class="kw">public</span> <span class="fn">Car</span>(<span class="ty">String</span> b, <span class="ty">int</span> y) { brand = b; year = y; }
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getBrand</span>() { <span class="kw">return</span> brand; }
+    <span class="kw">public</span> <span class="ty">int</span>    <span class="fn">getYear</span>()  { <span class="kw">return</span> year;  }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Car</span> c = <span class="kw">new</span> <span class="fn">Car</span>(<span class="st">"Toyota"</span>, <span class="nm">2022</span>);
+System.out.<span class="fn">println</span>(c.<span class="fn">getBrand</span>() + <span class="st">" "</span> + c.<span class="fn">getYear</span>());`,
+        options: ["Toyota 2022", "null 0", "Compile error", "2022 Toyota"],
+        correct: 0,
+        explain: "The constructor sets brand='Toyota' and year=2022. Both getters return those values."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Box</span> {
+    <span class="kw">private</span> <span class="ty">int</span> width;
+    <span class="kw">public void</span> <span class="fn">setWidth</span>(<span class="ty">int</span> w) { width = w; }
+    <span class="kw">public</span>  <span class="ty">int</span> <span class="fn">getWidth</span>()     { <span class="kw">return</span> width; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Box</span> b = <span class="kw">new</span> <span class="fn">Box</span>();
+b.<span class="fn">setWidth</span>(<span class="nm">15</span>);
+b.<span class="fn">setWidth</span>(b.<span class="fn">getWidth</span>() + <span class="nm">5</span>);
+System.out.<span class="fn">println</span>(b.<span class="fn">getWidth</span>());`,
+        options: ["15", "20", "5", "0"],
+        correct: 1,
+        explain: "First set to 15, then set to 15+5=20."
+      },
+      {
+        q: "what does this print?",
+        code: `<span class="kw">class</span> <span class="ty">Counter</span> {
+    <span class="kw">private</span> <span class="ty">int</span> count = <span class="nm">0</span>;
+    <span class="kw">public void</span> <span class="fn">increment</span>() { count++; }
+    <span class="kw">public</span>  <span class="ty">int</span> <span class="fn">getCount</span>()  { <span class="kw">return</span> count; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Counter</span> c1 = <span class="kw">new</span> <span class="fn">Counter</span>();
+<span class="ty">Counter</span> c2 = <span class="kw">new</span> <span class="fn">Counter</span>();
+c1.<span class="fn">increment</span>(); c1.<span class="fn">increment</span>();
+c2.<span class="fn">increment</span>();
+System.out.<span class="fn">println</span>(c1.<span class="fn">getCount</span>() + <span class="st">" "</span> + c2.<span class="fn">getCount</span>());`,
+        options: ["2 2", "2 1", "1 1", "3 3"],
+        correct: 1,
+        explain: "c1 is incremented twice → 2. c2 is incremented once → 1. Each object has its own state."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Person</span> {
+    <span class="kw">private</span> <span class="ty">String</span> name;
+    <span class="kw">private</span> <span class="ty">int</span>    age;
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getName</span>() { <span class="kw">return</span> name; }
+    <span class="kw">public</span>  <span class="ty">int</span>   <span class="fn">getAge</span>()  { <span class="kw">return</span> age;  }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Person</span> p = <span class="kw">new</span> <span class="fn">Person</span>();
+System.out.<span class="fn">println</span>(p.<span class="fn">getName</span>() + <span class="st">" "</span> + p.<span class="fn">getAge</span>());`,
+        options: ["null 0", "\"\" 0", "null null", "0 null"],
+        correct: 0,
+        explain: "Java initializes reference types (String) to null and numeric types (int) to 0 by default."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Temperature</span> {
+    <span class="kw">private</span> <span class="ty">double</span> celsius;
+    <span class="kw">public void</span>   <span class="fn">setCelsius</span>(<span class="ty">double</span> c) { celsius = c; }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getFahrenheit</span>() {
+        <span class="kw">return</span> celsius * <span class="nm">9</span> / <span class="nm">5</span> + <span class="nm">32</span>;
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Temperature</span> t = <span class="kw">new</span> <span class="fn">Temperature</span>();
+t.<span class="fn">setCelsius</span>(<span class="nm">100</span>);
+System.out.<span class="fn">println</span>(t.<span class="fn">getFahrenheit</span>());`,
+        options: ["100.0", "180.0", "212.0", "373.0"],
+        correct: 2,
+        explain: "100 × 9/5 + 32 = 180 + 32 = 212.0."
+      },
+      {
+        q: "what does getBalance() return?",
+        code: `<span class="kw">class</span> <span class="ty">BankAccount</span> {
+    <span class="kw">private</span> <span class="ty">double</span> balance = <span class="nm">1000.0</span>;
+    <span class="kw">public void</span>   <span class="fn">deposit</span>(<span class="ty">double</span> amount) {
+        <span class="kw">if</span> (amount > <span class="nm">0</span>) balance += amount;
+    }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getBalance</span>() { <span class="kw">return</span> balance; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">BankAccount</span> acc = <span class="kw">new</span> <span class="fn">BankAccount</span>();
+acc.<span class="fn">deposit</span>(<span class="nm">500</span>);
+acc.<span class="fn">deposit</span>(-<span class="nm">100</span>);
+System.out.<span class="fn">println</span>(acc.<span class="fn">getBalance</span>());`,
+        options: ["1500.0", "1400.0", "1000.0", "400.0"],
+        correct: 0,
+        explain: "deposit(500) → 1500. deposit(-100) rejected (not > 0). Balance stays 1500.0."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Circle</span> {
+    <span class="kw">private</span> <span class="ty">double</span> radius;
+    <span class="kw">public</span> <span class="fn">Circle</span>(<span class="ty">double</span> r) { radius = r; }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getArea</span>() { <span class="kw">return</span> <span class="nm">3.14</span> * radius * radius; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Circle</span> c1 = <span class="kw">new</span> <span class="fn">Circle</span>(<span class="nm">5</span>);
+<span class="ty">Circle</span> c2 = <span class="kw">new</span> <span class="fn">Circle</span>(<span class="nm">3</span>);
+System.out.<span class="fn">println</span>(c1.<span class="fn">getArea</span>() > c2.<span class="fn">getArea</span>());`,
+        options: ["true", "false", "1", "78.5"],
+        correct: 0,
+        explain: "c1 area = 3.14×25 = 78.5; c2 area = 3.14×9 = 28.26. 78.5 > 28.26 → true."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Dog</span> {
+    <span class="kw">private</span> <span class="ty">String</span> name;
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getName</span>() { <span class="kw">return</span> name; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Dog</span> d = <span class="kw">null</span>;
+System.out.<span class="fn">println</span>(d.<span class="fn">getName</span>());`,
+        options: ["null", "\"\"", "NullPointerException", "Compile error"],
+        correct: 2,
+        explain: "d is null — no object exists. Calling getName() on null throws NullPointerException at runtime."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Point</span> {
+    <span class="kw">private</span> <span class="ty">int</span> x, y;
+    <span class="kw">public</span> <span class="fn">Point</span>(<span class="ty">int</span> x, <span class="ty">int</span> y) { <span class="kw"></span>x = x; <span class="kw"></span>y = y; }
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">toString</span>() {
+        <span class="kw">return</span> <span class="st">"("</span> + x + <span class="st">", "</span> + y + <span class="st">")"</span>;
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Point</span> p = <span class="kw">new</span> <span class="fn">Point</span>(<span class="nm">3</span>, <span class="nm">7</span>);
+System.out.<span class="fn">println</span>(p);`,
+        options: ["Point@...", "(3, 7)", "3 7", "x=3 y=7"],
+        correct: 1,
+        explain: "println(object) calls toString() automatically. Our override returns '(3, 7)'."
+      },
+      {
+        q: "What does this program print?",
+        code: `<span class="kw">class</span> <span class="ty">Player</span> {
+    <span class="kw">private</span> <span class="ty">int</span> score = <span class="nm">0</span>;
+    <span class="kw">public void</span> <span class="fn">addPoints</span>(<span class="ty">int</span> pts) { score += pts; }
+    <span class="kw">public</span>  <span class="ty">int</span> <span class="fn">getScore</span>()          { <span class="kw">return</span> score; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Player</span> p = <span class="kw">new</span> <span class="fn">Player</span>();
+p.<span class="fn">addPoints</span>(<span class="nm">10</span>); p.<span class="fn">addPoints</span>(<span class="nm">25</span>); p.<span class="fn">addPoints</span>(<span class="nm">15</span>);
+System.out.<span class="fn">println</span>(p.<span class="fn">getScore</span>());`,
+        options: ["25", "50", "15", "10"],
+        correct: 1,
+        explain: "0 + 10 = 10, then 10 + 25 = 35, then 35 + 15 = 50."
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Constructors",
+    icon: "🏗️",
+    color: "#a855f7",
+    tag: "L03",
+    questions: [
+      {
+        q:"What is the full output?",
+        code:`<span class="kw">public class</span> <span class="ty">Test</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+        <span class="ty">T</span> t1 = <span class="kw">new</span> <span class="fn">T</span>();
+        <span class="ty">T</span> t2 = <span class="kw">new</span> <span class="fn">T</span>();
+        System.out.<span class="fn">println</span>(<span class="st">"t1 : i = "</span> + t1.i + <span class="st">", j = "</span> + t1.j);
+        System.out.<span class="fn">println</span>(<span class="st">"t2 : i = "</span> + t2.i + <span class="st">", j = "</span> + t2.j);
+    }
+}
+<span class="kw">class</span> <span class="ty">T</span> {
+    <span class="kw">static int</span> i = <span class="nm">0</span>;   <span class="cm"></span>
+    <span class="ty">int</span> j = <span class="nm">0</span>;           <span class="cm"></span>
+    <span class="fn">T</span>() { i++; j++; }
+}`,
+        options:[
+          "t1 : i = 1, j = 1\nt2 : i = 2, j = 1",
+          "t1 : i = 1, j = 1\nt2 : i = 1, j = 1",
+          "t1 : i = 2, j = 1\nt2 : i = 2, j = 1",
+          "t1 : i = 2, j = 2\nt2 : i = 2, j = 2"
+        ],
+        correct:2,
+        explain:"i is static — incremented by every constructor call. After t1: i=1. After t2: i=2. Both t1.i and t2.i read the same static field → 2. j is an instance field — each object gets its own copy, incremented once → j=1 for both. Output: both lines show i=2, j=1."
+      },
+      {
+        q:"What does this program print?",
+        code:`<span class="kw">public class</span> <span class="ty">Test</span> {
+    <span class="kw">private int</span> x;
+    <span class="kw">public</span> <span class="fn">Test</span>() {
+        <span class="kw">this</span>(<span class="nm">5</span>);
+        System.out.<span class="fn">print</span>(<span class="st">"A"</span>);
+    }
+    <span class="kw">public</span> <span class="fn">Test</span>(<span class="ty">int</span> x) {
+        <span class="kw">this</span>.x = x;
+        System.out.<span class="fn">print</span>(<span class="st">"B"</span>);
+    }
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+        <span class="ty">Test</span> t = <span class="kw">new</span> <span class="fn">Test</span>();
+    }
+}`,
+        options:["A","B","AB","BA"],
+        correct:3,
+        explain:'The no-arg constructor calls this(5), which invokes the one-parameter constructor. That constructor prints B, then returns, the no-arg constructor continues and prints A. so output is BA.'
+      },
+      {
+        q:"What is the output?",
+        code:`<span class="kw">public class</span> <span class="ty">Point</span> {
+    <span class="kw">private int</span> x, y;
+    <span class="kw">public</span> <span class="fn">Point</span>() {
+        x = <span class="nm">1</span>; y = <span class="nm">2</span>;
+    }
+    <span class="kw">public</span> <span class="fn">Point</span>(<span class="ty">int</span> x, <span class="ty">int</span> y) {
+        x = x;   <span class="cm"></span>
+        y = y;   <span class="cm"></span>
+    }
+    <span class="kw">public void</span> <span class="fn">print</span>() {
+        System.out.<span class="fn">println</span>(x + <span class="st">","</span> + y);
+    }
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+        <span class="ty">Point</span> p1 = <span class="kw">new</span> <span class="fn">Point</span>();
+        <span class="ty">Point</span> p2 = <span class="kw">new</span> <span class="fn">Point</span>(<span class="nm">5</span>, <span class="nm">6</span>);
+        p1.<span class="fn">print</span>();
+        p2.<span class="fn">print</span>();
+    }
+}`,
+        options:["1,2\n5,6","5,6\n1,2","1,2\n0,0","0,0\n5,6"],
+        correct:2,
+        explain:'p1 uses the no-arg constructor, setting x=1, y=2. p2 uses the parameterized constructor, but the statements x = x; and y = y; assign the parameters to themselves, leaving the instance fields at default values 0,0.'
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Item</span> {
+    <span class="ty">int</span>     quantity;
+    <span class="ty">double</span>  price;
+    <span class="ty">boolean</span> available;
+}
+<span class="cm">// in main:</span>
+<span class="ty">Item</span> item = <span class="kw">new</span> <span class="fn">Item</span>();
+System.out.<span class="fn">println</span>(item.quantity + <span class="st">" "</span> + item.price + <span class="st">" "</span> + item.available);`,
+        options: ["0 0.0 false", "0 0 false", "null null null", "Compile error"],
+        correct: 0,
+        explain: "Java defaults: int → 0, double → 0.0, boolean → false."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Rectangle</span> {
+    <span class="kw">private</span> <span class="ty">int</span> length, width;
+    <span class="kw">public</span> <span class="fn">Rectangle</span>(<span class="ty">int</span> l, <span class="ty">int</span> w) { length = l; width = w; }
+    <span class="kw">public</span>  <span class="ty">int</span> <span class="fn">getArea</span>() { <span class="kw">return</span> length * width; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Rectangle</span> r = <span class="kw">new</span> <span class="fn">Rectangle</span>(<span class="nm">6</span>, <span class="nm">4</span>);
+System.out.<span class="fn">println</span>(r.<span class="fn">getArea</span>());`,
+        options: ["10", "12", "24", "20"],
+        correct: 2,
+        explain: "length=6, width=4. Area = 6×4 = 24."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Book</span> {
+    <span class="ty">String</span> title; <span class="ty">int</span> pages;
+    <span class="kw">public</span> <span class="fn">Book</span>()               { title = <span class="st">"Unknown"</span>; pages = <span class="nm">0</span>;   }
+    <span class="kw">public</span> <span class="fn">Book</span>(<span class="ty">String</span> t)         { title = t;         pages = <span class="nm">100</span>; }
+    <span class="kw">public</span> <span class="fn">Book</span>(<span class="ty">String</span> t, <span class="ty">int</span> p) { title = t;         pages = p;   }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Book</span> b1 = <span class="kw">new</span> <span class="fn">Book</span>();
+<span class="ty">Book</span> b2 = <span class="kw">new</span> <span class="fn">Book</span>(<span class="st">"Java"</span>);
+System.out.<span class="fn">println</span>(b1.title + <span class="st">" "</span> + b2.pages);`,
+        options: ["Unknown 0", "Unknown 100", "Java 100", "null 0"],
+        correct: 1,
+        explain: "b1 uses no-arg constructor → title='Unknown'. b2 uses single-String constructor → pages=100."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Triangle</span> {
+    <span class="kw">private</span> <span class="ty">double</span> base, height;
+    <span class="kw">public</span> <span class="fn">Triangle</span>(<span class="ty">double</span> b, <span class="ty">double</span> h) { base = b; height = h; }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getArea</span>() { <span class="kw">return</span> <span class="nm">0.5</span> * base * height; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Triangle</span> t = <span class="kw">new</span> <span class="fn">Triangle</span>(<span class="nm">8</span>, <span class="nm">5</span>);
+System.out.<span class="fn">println</span>(t.<span class="fn">getArea</span>());`,
+        options: ["20.0", "40.0", "13.0", "10.0"],
+        correct: 0,
+        explain: "0.5 × 8 × 5 = 0.5 × 40 = 20.0"
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Score</span> {
+    <span class="kw">private</span> <span class="ty">int</span> value;
+    <span class="kw">public</span> <span class="fn">Score</span>()      { value = <span class="nm">50</span>; }
+    <span class="kw">public</span> <span class="fn">Score</span>(<span class="ty">int</span> v) { value = v;  }
+    <span class="kw">public</span>  <span class="ty">int</span> <span class="fn">getValue</span>() { <span class="kw">return</span> value; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Score</span> s1 = <span class="kw">new</span> <span class="fn">Score</span>();
+<span class="ty">Score</span> s2 = <span class="kw">new</span> <span class="fn">Score</span>(<span class="nm">85</span>);
+System.out.<span class="fn">println</span>(s1.<span class="fn">getValue</span>() + <span class="st">" "</span> + s2.<span class="fn">getValue</span>());`,
+        options: ["0 85", "50 50", "50 85", "85 85"],
+        correct: 2,
+        explain: "s1 uses no-arg → value=50. s2 uses parameterized → value=85."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Timer</span> {
+    <span class="kw">private</span> <span class="ty">int</span> seconds;
+    <span class="kw">public</span> <span class="fn">Timer</span>(<span class="ty">int</span> s) {
+        seconds = s;
+        System.out.<span class="fn">println</span>(<span class="st">"Timer: "</span> + seconds);
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Timer</span> t1 = <span class="kw">new</span> <span class="fn">Timer</span>(<span class="nm">30</span>);
+<span class="ty">Timer</span> t2 = <span class="kw">new</span> <span class="fn">Timer</span>(<span class="nm">60</span>);`,
+        options: ["Timer: 60\nTimer: 30", "Timer: 30\nTimer: 60", "Timer: 90", "No output"],
+        correct: 1,
+        explain: "Each new object creation calls the constructor. t1 created first → 'Timer: 30', then t2 → 'Timer: 60'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Sensor</span> {
+    <span class="ty">int</span>     reading;
+    <span class="ty">double</span>  temperature;
+    <span class="ty">boolean</span> active;
+    <span class="ty">String</span>  label;
+}
+<span class="cm">// in main:</span>
+<span class="ty">Sensor</span> s = <span class="kw">new</span> <span class="fn">Sensor</span>();
+System.out.<span class="fn">println</span>(s.reading+<span class="st">" "</span>+s.temperature+<span class="st">" "</span>+s.active+<span class="st">" "</span>+s.label);`,
+        options: ["0 0.0 false null", "0 0 false \"\"", "null null null null", "0 0.0 true null"],
+        correct: 0,
+        explain: "int→0, double→0.0, boolean→false, String (reference)→null."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Player</span> {
+    <span class="kw">private</span> <span class="ty">int</span> health;
+    <span class="kw">public</span> <span class="fn">Player</span>(<span class="ty">int</span> h) { health = h; }
+    <span class="kw">public void</span> <span class="fn">takeDamage</span>(<span class="ty">int</span> d) { health -= d; }
+    <span class="kw">public</span>  <span class="ty">int</span> <span class="fn">getHealth</span>()        { <span class="kw">return</span> health; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Player</span> p = <span class="kw">new</span> <span class="fn">Player</span>(<span class="nm">100</span>);
+p.<span class="fn">takeDamage</span>(<span class="nm">30</span>);
+p.<span class="fn">takeDamage</span>(<span class="nm">20</span>);
+System.out.<span class="fn">println</span>(p.<span class="fn">getHealth</span>());`,
+        options: ["150", "70", "50", "-50"],
+        correct: 2,
+        explain: "100 − 30 = 70, then 70 − 20 = 50."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Message</span> {
+    <span class="ty">String</span> text; <span class="ty">int</span> priority;
+    <span class="kw">public</span> <span class="fn">Message</span>(<span class="ty">String</span> t)         { text = t; priority = <span class="nm">1</span>; }
+    <span class="kw">public</span> <span class="fn">Message</span>(<span class="ty">String</span> t, <span class="ty">int</span> p) { text = t; priority = p; }
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">toString</span>() { <span class="kw">return</span> text + <span class="st">":"</span> + priority; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Message</span> m = <span class="kw">new</span> <span class="fn">Message</span>(<span class="st">"Alert"</span>, <span class="nm">3</span>);
+System.out.<span class="fn">println</span>(m);`,
+        options: ["Alert:1", "Alert:3", "Alert", "Compile error"],
+        correct: 1,
+        explain: "Two arguments → second constructor. text='Alert', priority=3. toString() returns 'Alert:3'."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Circle</span> {
+    <span class="kw">private</span> <span class="ty">double</span> radius;
+    <span class="kw">public</span> <span class="fn">Circle</span>(<span class="ty">double</span> radius) {
+        <span class="kw">this</span>.radius = radius;
+    }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getRadius</span>() { <span class="kw">return</span> radius; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Circle</span> c = <span class="kw">new</span> <span class="fn">Circle</span>(<span class="nm">7.5</span>);
+System.out.<span class="fn">println</span>(c.<span class="fn">getRadius</span>());`,
+        options: ["0.0", "7.5", "7", "Compile error"],
+        correct: 1,
+        explain: "this.radius = radius assigns the parameter value 7.5 to the instance field radius."
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "Static Class Members",
+    icon: "🔧",
+    color: "#f59e0b",
+    tag: "L04",
+    questions: [
+      {
+        q:"What is the output?",
+        code:`<span class="kw">public class</span> <span class="ty">A</span> {
+    <span class="ty">int</span> i = <span class="nm">20</span>;
+    <span class="kw">void</span> <span class="fn">m</span>() {
+        <span class="ty">int</span> i = <span class="nm">5</span>;           <span class="cm"></span>
+        System.out.<span class="fn">println</span>(i);
+    }
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] a) {
+        <span class="kw">new</span> <span class="fn">A</span>().<span class="fn">m</span>();
+    }
+}`,
+        options:["5","20","25","Compile error"],
+        correct:0,
+        explain:'The local variable i = 5 hides the instance variable i = 20; System.out.println(i) prints the local variable.'
+      },
+      {
+        q:'What is the output?',
+        code:`<span class="kw">public class</span> <span class="ty">A</span> {
+    <span class="ty">int</span> i = <span class="nm">20</span>;
+    <span class="kw">void</span> <span class="fn">m</span>() {
+        <span class="ty">int</span> i = <span class="nm">5</span>;
+        System.out.<span class="fn">println</span>(<span class="kw">this</span>.i);  <span class="cm"></span>
+    }
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] a) {
+        <span class="kw">new</span> <span class="fn">A</span>().<span class="fn">m</span>();
+    }
+}`,
+        options:["5","20","25","Compile error"],
+        correct:1,
+        explain:'this.i refers to the instance variable (20), not the local variable (5).'
+      },
+      {
+        q:"What happens when this code is compiled and run?",
+        code:`<span class="kw">public class</span> <span class="ty">T</span> {
+    <span class="ty">int</span> x = <span class="nm">5</span>;          <span class="cm"></span>
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] a) {
+        System.out.<span class="fn">println</span>(x);  <span class="cm"></span>
+    }
+}`,
+        options:["Prints 5","Prints 0","Prints null","Compile error"],
+        correct:3,
+        explain:'x is an instance field; accessing it directly inside a static method causes a compile error.'
+      },
+      {
+        q:"What is printed?",
+        code:`<span class="kw">public class</span> <span class="ty">Bike</span> {
+    <span class="kw">static int</span> count = <span class="nm">0</span>;
+    <span class="ty">int</span> id;
+    <span class="fn">Bike</span>() {
+        count++;
+        id = count;
+    }
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] a) {
+        <span class="ty">Bike</span> b1 = <span class="kw">new</span> <span class="fn">Bike</span>();
+        <span class="ty">Bike</span> b2 = <span class="kw">new</span> <span class="fn">Bike</span>();
+        System.out.<span class="fn">println</span>(b1.id + <span class="st">" "</span> + b2.id);
+    }
+}`,
+        options:["0 0","1 1","1 2","2 2"],
+        correct:2,
+        explain:'b1 is constructed first (count becomes 1, id=1), then b2 (count becomes 2, id=2).'
+      },
+      {
+        q:"What is printed?",
+        code:`<span class="kw">public class</span> <span class="ty">Demo</span> {
+    <span class="kw">static int</span> val = <span class="nm">100</span>;
+    <span class="kw">public static void</span> <span class="fn">change</span>() {
+        val = <span class="nm">200</span>;
+    }
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] a) {
+        <span class="ty">Demo</span> d1 = <span class="kw">new</span> <span class="fn">Demo</span>();
+        <span class="ty">Demo</span> d2 = <span class="kw">new</span> <span class="fn">Demo</span>();
+        d1.<span class="fn">change</span>();
+        System.out.<span class="fn">println</span>(d2.val);
+    }
+}`,
+        options:["100","200","0","Compile error"],
+        correct:1,
+        explain:'val is static and shared. d1.change() sets val=200; d2.val also sees 200.'
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Dog</span> {
+    <span class="kw">private static</span> <span class="ty">int</span> count = <span class="nm">0</span>;
+    <span class="kw">private</span> <span class="ty">String</span> name;
+    <span class="kw">public</span> <span class="fn">Dog</span>(<span class="ty">String</span> n) { name = n; count++; }
+    <span class="kw">public static</span> <span class="ty">int</span> <span class="fn">getCount</span>() { <span class="kw">return</span> count; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Dog</span> d1 = <span class="kw">new</span> <span class="fn">Dog</span>(<span class="st">"Rex"</span>);
+<span class="ty">Dog</span> d2 = <span class="kw">new</span> <span class="fn">Dog</span>(<span class="st">"Buddy"</span>);
+<span class="ty">Dog</span> d3 = <span class="kw">new</span> <span class="fn">Dog</span>(<span class="st">"Max"</span>);
+System.out.<span class="fn">println</span>(<span class="ty">Dog</span>.<span class="fn">getCount</span>());`,
+        options: ["1", "2", "3", "Error"],
+        correct: 2,
+        explain: "Static field count is shared. Each constructor call increments it: 1→2→3."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Vehicle</span> {
+    <span class="kw">public static</span> <span class="ty">int</span> speed = <span class="nm">60</span>;
+}
+<span class="cm">// in main:</span>
+<span class="ty">Vehicle</span> v1 = <span class="kw">new</span> <span class="fn">Vehicle</span>();
+<span class="ty">Vehicle</span> v2 = <span class="kw">new</span> <span class="fn">Vehicle</span>();
+v1.speed = <span class="nm">80</span>;
+System.out.<span class="fn">println</span>(v2.speed);`,
+        options: ["60", "80", "Compile error", "0"],
+        correct: 1,
+        explain: "Static fields are shared across all instances. Changing speed via v1 affects v2 as well."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Foo</span> {
+    <span class="ty">int</span> value = <span class="nm">100</span>;
+    <span class="kw">void</span> <span class="fn">print</span>() {
+        <span class="ty">int</span> value = <span class="nm">50</span>;
+        System.out.<span class="fn">println</span>(value);
+        System.out.<span class="fn">println</span>(<span class="kw">this</span>.value);
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Foo</span> f = <span class="kw">new</span> <span class="fn">Foo</span>();
+f.<span class="fn">print</span>();`,
+        options: ["100\n100", "50\n100", "50\n50", "100\n50"],
+        correct: 1,
+        explain: "value (no this) refers to local variable → 50. this.value refers to instance field → 100."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">MathUtils</span> {
+    <span class="kw">public static</span> <span class="ty">int</span> <span class="fn">cube</span>(<span class="ty">int</span> n) { <span class="kw">return</span> n * n * n; }
+}
+<span class="cm">// in main:</span>
+System.out.<span class="fn">println</span>(<span class="ty">MathUtils</span>.<span class="fn">cube</span>(<span class="nm">4</span>));`,
+        options: ["12", "16", "64", "256"],
+        correct: 2,
+        explain: "4³ = 4 × 4 × 4 = 64. Called on the class name directly."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Account</span> {
+    <span class="kw">private</span>        <span class="ty">double</span> balance;
+    <span class="kw">private static</span> <span class="ty">double</span> interestRate = <span class="nm">0.05</span>;
+    <span class="kw">public</span> <span class="fn">Account</span>(<span class="ty">double</span> b) { balance = b; }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getInterest</span>() { <span class="kw">return</span> balance * interestRate; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Account</span> a1 = <span class="kw">new</span> <span class="fn">Account</span>(<span class="nm">1000</span>);
+<span class="ty">Account</span> a2 = <span class="kw">new</span> <span class="fn">Account</span>(<span class="nm">2000</span>);
+System.out.<span class="fn">println</span>(a1.<span class="fn">getInterest</span>() + <span class="st">" "</span> + a2.<span class="fn">getInterest</span>());`,
+        options: ["50.0 100.0", "0.05 0.05", "1000.0 2000.0", "100.0 200.0"],
+        correct: 0,
+        explain: "1000 × 0.05 = 50.0 and 2000 × 0.05 = 100.0. The static rate is shared, but balance differs per object."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Ticket</span> {
+    <span class="kw">private static</span> <span class="ty">int</span> nextId = <span class="nm">1</span>;
+    <span class="kw">private</span>        <span class="ty">int</span> id;
+    <span class="kw">public</span> <span class="fn">Ticket</span>() { id = nextId++; }
+    <span class="kw">public</span>  <span class="ty">int</span>  <span class="fn">getId</span>() { <span class="kw">return</span> id; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Ticket</span> t1 = <span class="kw">new</span> <span class="fn">Ticket</span>();
+<span class="ty">Ticket</span> t2 = <span class="kw">new</span> <span class="fn">Ticket</span>();
+<span class="ty">Ticket</span> t3 = <span class="kw">new</span> <span class="fn">Ticket</span>();
+System.out.<span class="fn">println</span>(t1.<span class="fn">getId</span>() + <span class="st">" "</span> + t2.<span class="fn">getId</span>() + <span class="st">" "</span> + t3.<span class="fn">getId</span>());`,
+        options: ["3 3 3", "1 1 1", "1 2 3", "0 1 2"],
+        correct: 2,
+        explain: "nextId starts at 1. t1 gets id=1 (nextId→2), t2 gets id=2 (nextId→3), t3 gets id=3."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Rectangle</span> {
+    <span class="ty">int</span> length = <span class="nm">5</span>, width = <span class="nm">3</span>;
+    <span class="kw">void</span> <span class="fn">scale</span>(<span class="ty">int</span> length, <span class="ty">int</span> width) {
+        System.out.<span class="fn">println</span>(length + <span class="st">" "</span> + width);
+        System.out.<span class="fn">println</span>(<span class="kw">this</span>.length + <span class="st">" "</span> + <span class="kw">this</span>.width);
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Rectangle</span> r = <span class="kw">new</span> <span class="fn">Rectangle</span>();
+r.<span class="fn">scale</span>(<span class="nm">10</span>, <span class="nm">6</span>);`,
+        options: ["5 3\n5 3", "10 6\n10 6", "10 6\n5 3", "5 3\n10 6"],
+        correct: 2,
+        explain: "Inside scale(), length and width refer to params (10,6). this.length and this.width refer to instance fields (5,3)."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Node</span> {
+    <span class="ty">int</span> data;
+    <span class="kw">public</span> <span class="fn">Node</span>(<span class="ty">int</span> d) { data = d; }
+    <span class="kw">public</span> <span class="ty">boolean</span> <span class="fn">isGreater</span>(<span class="ty">Node</span> other) {
+        <span class="kw">return</span> <span class="kw">this</span>.data > other.data;
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Node</span> n1 = <span class="kw">new</span> <span class="fn">Node</span>(<span class="nm">10</span>);
+<span class="ty">Node</span> n2 = <span class="kw">new</span> <span class="fn">Node</span>(<span class="nm">7</span>);
+System.out.<span class="fn">println</span>(n1.<span class="fn">isGreater</span>(n2));`,
+        options: ["true", "false", "10", "Compile error"],
+        correct: 0,
+        explain: "this refers to n1 (data=10). other is n2 (data=7). 10 > 7 → true."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Counter</span> {
+    <span class="kw">public static</span> <span class="ty">int</span> total = <span class="nm">0</span>;
+    <span class="kw">public</span> <span class="fn">Counter</span>() { total++; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Counter</span> a = <span class="kw">new</span> <span class="fn">Counter</span>();
+<span class="ty">Counter</span> b = <span class="kw">new</span> <span class="fn">Counter</span>();
+System.out.<span class="fn">println</span>(<span class="ty">Counter</span>.total);`,
+        options: ["1", "2", "0", "Compile error"],
+        correct: 1,
+        explain: "static field total starts at 0; each constructor increments it. Two objects → total = 2."
+      },
+      {
+        q: "What does this print?",
+        code: `<span class="kw">class</span> <span class="ty">Lamp</span> {
+    <span class="kw">private static</span> <span class="ty">int</span> count = <span class="nm">0</span>;
+    <span class="kw">private</span>        <span class="ty">boolean</span> on;
+    <span class="kw">public</span> <span class="fn">Lamp</span>(<span class="ty">boolean</span> state) { on = state; count++; }
+    <span class="kw">public static</span> <span class="ty">int</span> <span class="fn">getCount</span>() { <span class="kw">return</span> count; }
+    <span class="kw">public</span> <span class="ty">boolean</span> <span class="fn">isOn</span>()         { <span class="kw">return</span> on;    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Lamp</span> l1 = <span class="kw">new</span> <span class="fn">Lamp</span>(<span class="kw">true</span>);
+<span class="ty">Lamp</span> l2 = <span class="kw">new</span> <span class="fn">Lamp</span>(<span class="kw">false</span>);
+System.out.<span class="fn">println</span>(<span class="ty">Lamp</span>.<span class="fn">getCount</span>() + <span class="st">" "</span> + l1.<span class="fn">isOn</span>() + <span class="st">" "</span> + l2.<span class="fn">isOn</span>());`,
+        options: ["2 true false", "1 true false", "2 false true", "2 true true"],
+        correct: 0,
+        explain: "Two lamps created → count=2. l1 was created with true → on=true. l2 with false → on=false."
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "Inheritance & Polymorphism",
+    icon: "🧬",
+    color: "#ec4899",
+    tag: "L05",
+    questions: [
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Animal</span> {
+    <span class="kw">public</span> <span class="fn">Animal</span>() { System.out.<span class="fn">println</span>(<span class="st">"Animal created"</span>); }
+}
+<span class="kw">class</span> <span class="ty">Cat</span> <span class="kw">extends</span> <span class="ty">Animal</span> {
+    <span class="kw">public</span> <span class="fn">Cat</span>()    { System.out.<span class="fn">println</span>(<span class="st">"Cat created"</span>);    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Cat</span> c = <span class="kw">new</span> <span class="fn">Cat</span>();`,
+        options: ["Cat created\nAnimal created", "Animal created\nCat created", "Animal created", "Cat created"],
+        correct: 1,
+        explain: "When a subclass object is created, the superclass default constructor runs first, then the subclass constructor."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Shape</span>  { <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getType</span>() { <span class="kw">return</span> <span class="st">"Shape"</span>;    } }
+<span class="kw">class</span> <span class="ty">Triangle</span> <span class="kw">extends</span> <span class="ty">Shape</span> {
+    <span class="kw">@Override</span>
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getType</span>() { <span class="kw">return</span> <span class="st">"Triangle"</span>; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Triangle</span> t = <span class="kw">new</span> <span class="fn">Triangle</span>();
+System.out.<span class="fn">println</span>(t.<span class="fn">getType</span>());`,
+        options: ["Shape", "Triangle", "Shape Triangle", "Compile error"],
+        correct: 1,
+        explain: "The subclass overrides getType(). Calling it on a Triangle object invokes the Triangle version."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Vehicle</span>  { <span class="kw">public</span> <span class="ty">String</span> <span class="fn">describe</span>() { <span class="kw">return</span> <span class="st">"Vehicle"</span>; } }
+<span class="kw">class</span> <span class="ty">Car</span> <span class="kw">extends</span> <span class="ty">Vehicle</span> {
+    <span class="kw">@Override</span>
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">describe</span>() {
+        <span class="kw">return</span> <span class="kw">super</span>.<span class="fn">describe</span>() + <span class="st">" -&gt; Car"</span>;
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Car</span> c = <span class="kw">new</span> <span class="fn">Car</span>();
+System.out.<span class="fn">println</span>(c.<span class="fn">describe</span>());`,
+        options: ["Car", "Vehicle", "Vehicle -> Car", "-> Car"],
+        correct: 2,
+        explain: "super.describe() returns 'Vehicle'; the subclass appends ' -> Car' → 'Vehicle -> Car'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Animal</span> { <span class="kw">public void</span> <span class="fn">sound</span>() { System.out.<span class="fn">println</span>(<span class="st">"Some sound"</span>); } }
+<span class="kw">class</span> <span class="ty">Dog</span> <span class="kw">extends</span> <span class="ty">Animal</span> {
+    <span class="kw">@Override</span>
+    <span class="kw">public void</span> <span class="fn">sound</span>() { System.out.<span class="fn">println</span>(<span class="st">"Woof"</span>); }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Animal</span> a = <span class="kw">new</span> <span class="fn">Dog</span>();
+a.<span class="fn">sound</span>();`,
+        options: ["Some sound", "Woof", "Compile error", "Some sound\nWoof"],
+        correct: 1,
+        explain: "Runtime type is Dog. Polymorphism uses the actual object type (Dog), not the reference type (Animal). Prints 'Woof'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Employee</span> {
+    <span class="kw">private</span> <span class="ty">String</span> name;
+    <span class="kw">public</span> <span class="fn">Employee</span>(<span class="ty">String</span> name) { <span class="kw">this</span>.name = name; }
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getName</span>() { <span class="kw">return</span> name; }
+}
+<span class="kw">class</span> <span class="ty">Manager</span> <span class="kw">extends</span> <span class="ty">Employee</span> {
+    <span class="kw">private</span> <span class="ty">int</span> dept;
+    <span class="kw">public</span> <span class="fn">Manager</span>(<span class="ty">String</span> name, <span class="ty">int</span> dept) {
+        <span class="kw">super</span>(name);
+        <span class="kw">this</span>.dept = dept;
+    }
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getInfo</span>() { <span class="kw">return</span> <span class="fn">getName</span>() + <span class="st">" Dept:"</span> + dept; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Manager</span> m = <span class="kw">new</span> <span class="fn">Manager</span>(<span class="st">"Alice"</span>, <span class="nm">5</span>);
+System.out.<span class="fn">println</span>(m.<span class="fn">getInfo</span>());`,
+        options: ["null Dept:5", "Alice Dept:0", "Alice Dept:5", "Compile error"],
+        correct: 2,
+        explain: "super('Alice') sets the Employee's name. dept=5. getInfo() returns 'Alice Dept:5'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Fruit</span>  { <span class="kw">public</span> <span class="ty">String</span> <span class="fn">color</span>() { <span class="kw">return</span> <span class="st">"Yellow"</span>; } }
+<span class="kw">class</span> <span class="ty">Banana</span> <span class="kw">extends</span> <span class="ty">Fruit</span> { <span class="cm"></span> }
+<span class="cm">// in main:</span>
+<span class="ty">Banana</span> b = <span class="kw">new</span> <span class="fn">Banana</span>();
+System.out.<span class="fn">println</span>(b.<span class="fn">color</span>());`,
+        options: ["null", "Yellow", "Compile error", "\"\""],
+        correct: 1,
+        explain: "Banana inherits color() from Fruit. No override, so Fruit's version runs → 'Yellow'."
+      },
+      {
+        q: "What does this loop print?",
+        code: `<span class="kw">class</span> <span class="ty">Shape</span>  { <span class="kw">public</span> <span class="ty">double</span> <span class="fn">area</span>() { <span class="kw">return</span> <span class="nm">0</span>; } }
+<span class="kw">class</span> <span class="ty">Square</span> <span class="kw">extends</span> <span class="ty">Shape</span> {
+    <span class="ty">int</span> side; <span class="kw">public</span> <span class="fn">Square</span>(<span class="ty">int</span> s) { side = s; }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">area</span>() { <span class="kw">return</span> side * side; }
+}
+<span class="kw">class</span> <span class="ty">Disk</span> <span class="kw">extends</span> <span class="ty">Shape</span> {
+    <span class="ty">int</span> r; <span class="kw">public</span> <span class="fn">Disk</span>(<span class="ty">int</span> r) { <span class="kw">this</span>.r = r; }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">area</span>() { <span class="kw">return</span> <span class="nm">3.14</span> * r * r; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Shape</span>[] shapes = { <span class="kw">new</span> <span class="fn">Square</span>(<span class="nm">4</span>), <span class="kw">new</span> <span class="fn">Disk</span>(<span class="nm">3</span>) };
+<span class="kw">for</span> (<span class="ty">Shape</span> s : shapes) System.out.<span class="fn">println</span>(s.<span class="fn">area</span>());`,
+        options: ["0.0\n0.0", "16.0\n28.26", "4.0\n3.0", "Compile error"],
+        correct: 1,
+        explain: "Square(4).area() = 4×4 = 16.0. Disk(3).area() = 3.14×9 = 28.26. Polymorphism picks the correct version at runtime."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Base</span> {
+    <span class="kw">protected</span> <span class="ty">int</span> value = <span class="nm">42</span>;
+}
+<span class="kw">class</span> <span class="ty">Derived</span> <span class="kw">extends</span> <span class="ty">Base</span> {
+    <span class="kw">public void</span> <span class="fn">show</span>() {
+        System.out.<span class="fn">println</span>(value);
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Derived</span> d = <span class="kw">new</span> <span class="fn">Derived</span>();
+d.<span class="fn">show</span>();`,
+        options: ["0", "42", "Compile error", "NullPointerException"],
+        correct: 1,
+        explain: "protected members are accessible in subclasses. Derived inherits value=42 from Base."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Animal</span> { }
+<span class="kw">class</span> <span class="ty">Parrot</span> <span class="kw">extends</span> <span class="ty">Animal</span> {
+    <span class="kw">public void</span> <span class="fn">speak</span>() { System.out.<span class="fn">println</span>(<span class="st">"Hello!"</span>); }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Animal</span> a = <span class="kw">new</span> <span class="fn">Parrot</span>();
+System.out.<span class="fn">println</span>(a <span class="kw">instanceof</span> <span class="ty">Animal</span>);
+System.out.<span class="fn">println</span>(a <span class="kw">instanceof</span> <span class="ty">Parrot</span>);`,
+        options: ["true\nfalse", "false\ntrue", "true\ntrue", "false\nfalse"],
+        correct: 2,
+        explain: "a is an instance of Parrot (subclass) AND Animal (superclass). Both instanceof checks return true."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">A</span> { <span class="kw">public</span> <span class="ty">String</span> <span class="fn">name</span>() { <span class="kw">return</span> <span class="st">"A"</span>; } }
+<span class="kw">class</span> <span class="ty">B</span> <span class="kw">extends</span> <span class="ty">A</span> {
+    <span class="kw">@Override</span> <span class="kw">public</span> <span class="ty">String</span> <span class="fn">name</span>() { <span class="kw">return</span> <span class="st">"B"</span>; }
+}
+<span class="kw">class</span> <span class="ty">C</span> <span class="kw">extends</span> <span class="ty">B</span> { <span class="cm"></span> }
+<span class="cm">// in main:</span>
+<span class="ty">A</span> obj = <span class="kw">new</span> <span class="fn">C</span>();
+System.out.<span class="fn">println</span>(obj.<span class="fn">name</span>());`,
+        options: ["A", "B", "A B", "Compile error"],
+        correct: 1,
+        explain: "C doesn't override name(). It inherits B's version. Runtime type is C, which uses B's override → 'B'."
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: "Abstract Classes & Interfaces",
+    icon: "🔷",
+    color: "#06b6d4",
+    tag: "L06",
+    questions: [
+      {
+        q:"What is the result when this program is compiled and run?",
+        code:`<span class="kw">abstract class</span> <span class="ty">Worker</span> {
+    <span class="kw">abstract void</span> <span class="fn">work</span>();
+    <span class="kw">abstract void</span> <span class="fn">rest</span>();
+}
+<span class="kw">class</span> <span class="ty">Programmer</span> <span class="kw">extends</span> <span class="ty">Worker</span> {
+    <span class="kw">void</span> <span class="fn">work</span>() { System.out.<span class="fn">println</span>(<span class="st">"Coding"</span>); }
+    <span class="kw">void</span> <span class="fn">rest</span>() { System.out.<span class="fn">println</span>(<span class="st">"Gaming"</span>); }
+    <span class="kw">void</span> <span class="fn">sleep</span>() { System.out.<span class="fn">println</span>(<span class="st">"Sleeping"</span>); }
+}
+<span class="kw">class</span> <span class="ty">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+        <span class="ty">Worker</span> w = <span class="kw">new</span> <span class="fn">Programmer</span>();
+        w.<span class="fn">work</span>();
+        w.<span class="fn">rest</span>();
+        w.<span class="fn">sleep</span>();  <span class="cm"></span>
+    }
+}`,
+        options:["Coding\nGaming\nSleeping","Coding\nGaming\nRuntime error","Compile error","Coding"],
+        correct:2,
+        explain:'If you create an object from a reference type superclass(Worker) and an object type subclass(Programmer), you can use only the methods in the superclass. sleep() is not declared in Worker.'
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">abstract class</span> <span class="ty">Shape</span> {
+    <span class="kw">abstract double</span> <span class="fn">area</span>();
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">describe</span>() { <span class="kw">return</span> <span class="st">"Area: "</span> + <span class="fn">area</span>(); }
+}
+<span class="kw">class</span> <span class="ty">Square</span> <span class="kw">extends</span> <span class="ty">Shape</span> {
+    <span class="ty">int</span> side; <span class="kw">public</span> <span class="fn">Square</span>(<span class="ty">int</span> s) { side = s; }
+    <span class="kw">public double</span> <span class="fn">area</span>() { <span class="kw">return</span> side * side; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Square</span> sq = <span class="kw">new</span> <span class="fn">Square</span>(<span class="nm">5</span>);
+System.out.<span class="fn">println</span>(sq.<span class="fn">describe</span>());`,
+        options: ["Area: 25", "Area: 25.0", "Compile error", "Area: 0.0"],
+        correct: 1,
+        explain: "5×5=25.0 (double). describe() returns 'Area: ' + 25.0 = 'Area: 25.0'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">interface</span> <span class="ty">Printable</span> { <span class="kw">void</span> <span class="fn">print</span>(); }
+<span class="kw">class</span> <span class="ty">Document</span> <span class="kw">implements</span> <span class="ty">Printable</span> {
+    <span class="kw">private</span> <span class="ty">String</span> content;
+    <span class="kw">public</span> <span class="fn">Document</span>(<span class="ty">String</span> c) { content = c; }
+    <span class="kw">public void</span> <span class="fn">print</span>() { System.out.<span class="fn">println</span>(content); }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Document</span> doc = <span class="kw">new</span> <span class="fn">Document</span>(<span class="st">"Hello World"</span>);
+doc.<span class="fn">print</span>();`,
+        options: ["content", "Hello World", "Compile error", "null"],
+        correct: 1,
+        explain: "Document implements Printable. print() prints the content field which holds 'Hello World'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">interface</span> <span class="ty">Flyable</span> { <span class="kw">void</span> <span class="fn">fly</span>(); }
+<span class="kw">class</span> <span class="ty">Airplane</span> <span class="kw">implements</span> <span class="ty">Flyable</span> {
+    <span class="kw">public void</span> <span class="fn">fly</span>() { System.out.<span class="fn">println</span>(<span class="st">"Airplane flying"</span>); }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Flyable</span> f = <span class="kw">new</span> <span class="fn">Airplane</span>();
+f.<span class="fn">fly</span>();`,
+        options: ["Compile error", "Airplane flying", "fly", "Nothing"],
+        correct: 1,
+        explain: "Interface reference can hold an implementing object. fly() calls Airplane's implementation."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">interface</span> <span class="ty">Config</span> {
+    <span class="ty">int</span> MAX = <span class="nm">100</span>;
+    <span class="ty">int</span> MIN = <span class="nm">0</span>;
+}
+<span class="kw">class</span> <span class="ty">App</span> <span class="kw">implements</span> <span class="ty">Config</span> {
+    <span class="kw">public void</span> <span class="fn">showLimits</span>() {
+        System.out.<span class="fn">println</span>(MIN + <span class="st">" to "</span> + MAX);
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">App</span> app = <span class="kw">new</span> <span class="fn">App</span>();
+app.<span class="fn">showLimits</span>();`,
+        options: ["null to null", "MIN to MAX", "0 to 100", "Compile error"],
+        correct: 2,
+        explain: "Interface fields are implicitly public static final. App accesses MIN=0 and MAX=100 → '0 to 100'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">interface</span> <span class="ty">Swimmable</span> { <span class="kw">void</span> <span class="fn">swim</span>(); }
+<span class="kw">interface</span> <span class="ty">Jumpable</span>  { <span class="kw">void</span> <span class="fn">jump</span>(); }
+<span class="kw">class</span> <span class="ty">Frog</span> <span class="kw">implements</span> <span class="ty">Swimmable</span>, <span class="ty">Jumpable</span> {
+    <span class="kw">public void</span> <span class="fn">swim</span>() { System.out.<span class="fn">println</span>(<span class="st">"Frog swims"</span>); }
+    <span class="kw">public void</span> <span class="fn">jump</span>() { System.out.<span class="fn">println</span>(<span class="st">"Frog jumps"</span>); }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Frog</span> f = <span class="kw">new</span> <span class="fn">Frog</span>();
+f.<span class="fn">swim</span>(); f.<span class="fn">jump</span>();`,
+        options: ["Frog jumps\nFrog swims", "Frog swims\nFrog jumps", "Compile error", "Nothing"],
+        correct: 1,
+        explain: "Frog implements both interfaces and provides both methods. swim() is called first → 'Frog swims', then jump() → 'Frog jumps'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">abstract class</span> <span class="ty">Animal</span> {
+    <span class="kw">public void</span> <span class="fn">breathe</span>() { System.out.<span class="fn">println</span>(<span class="st">"Breathing"</span>); }
+    <span class="kw">abstract void</span> <span class="fn">makeSound</span>();
+}
+<span class="kw">class</span> <span class="ty">Cow</span> <span class="kw">extends</span> <span class="ty">Animal</span> {
+    <span class="kw">public void</span> <span class="fn">makeSound</span>() { System.out.<span class="fn">println</span>(<span class="st">"Moo"</span>); }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Cow</span> c = <span class="kw">new</span> <span class="fn">Cow</span>();
+c.<span class="fn">breathe</span>(); c.<span class="fn">makeSound</span>();`,
+        options: ["Breathing\nMoo", "Moo\nBreathing", "Compile error", "Breathing"],
+        correct: 0,
+        explain: "breathe() is a concrete inherited method → 'Breathing'. makeSound() is overridden in Cow → 'Moo'."
+      },
+      {
+        q: "What does this print?",
+        code: `<span class="kw">interface</span> <span class="ty">Calculator</span> { <span class="ty">int</span> <span class="fn">compute</span>(<span class="ty">int</span> a, <span class="ty">int</span> b); }
+<span class="kw">class</span> <span class="ty">Adder</span>      <span class="kw">implements</span> <span class="ty">Calculator</span> {
+    <span class="kw">public</span> <span class="ty">int</span> <span class="fn">compute</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) { <span class="kw">return</span> a + b; }
+}
+<span class="kw">class</span> <span class="ty">Multiplier</span> <span class="kw">implements</span> <span class="ty">Calculator</span> {
+    <span class="kw">public</span> <span class="ty">int</span> <span class="fn">compute</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) { <span class="kw">return</span> a * b; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Calculator</span> c1 = <span class="kw">new</span> <span class="fn">Adder</span>();
+<span class="ty">Calculator</span> c2 = <span class="kw">new</span> <span class="fn">Multiplier</span>();
+System.out.<span class="fn">println</span>(c1.<span class="fn">compute</span>(<span class="nm">3</span>, <span class="nm">4</span>) + <span class="st">" "</span> + c2.<span class="fn">compute</span>(<span class="nm">3</span>, <span class="nm">4</span>));`,
+        options: ["7 12", "12 7", "12 12", "7 7"],
+        correct: 0,
+        explain: "c1 is Adder: 3+4=7. c2 is Multiplier: 3×4=12. Prints '7 12'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">abstract class</span> <span class="ty">Instrument</span> {
+    <span class="kw">abstract</span> <span class="ty">String</span> <span class="fn">play</span>();
+}
+<span class="kw">class</span> <span class="ty">Guitar</span> <span class="kw">extends</span> <span class="ty">Instrument</span> {
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">play</span>() { <span class="kw">return</span> <span class="st">"Strumming"</span>; }
+}
+<span class="kw">class</span> <span class="ty">Piano</span>  <span class="kw">extends</span> <span class="ty">Instrument</span> {
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">play</span>() { <span class="kw">return</span> <span class="st">"Pressing keys"</span>; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Instrument</span> i = <span class="kw">new</span> <span class="fn">Guitar</span>();
+System.out.<span class="fn">println</span>(i.<span class="fn">play</span>());`,
+        options: ["Pressing keys", "Strumming", "Compile error", "null"],
+        correct: 1,
+        explain: "Reference is Instrument but object is Guitar. Polymorphism calls Guitar's play() → 'Strumming'."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">interface</span> <span class="ty">Limits</span> { <span class="ty">int</span> MAX_SPEED = <span class="nm">120</span>; }
+<span class="kw">class</span> <span class="ty">Car</span> <span class="kw">implements</span> <span class="ty">Limits</span> {
+    <span class="ty">int</span> speed;
+    <span class="kw">public</span> <span class="fn">Car</span>(<span class="ty">int</span> s) { speed = s; }
+    <span class="kw">public</span> <span class="ty">boolean</span> <span class="fn">isSpeeding</span>() { <span class="kw">return</span> speed > MAX_SPEED; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Car</span> c1 = <span class="kw">new</span> <span class="fn">Car</span>(<span class="nm">100</span>);
+<span class="ty">Car</span> c2 = <span class="kw">new</span> <span class="fn">Car</span>(<span class="nm">150</span>);
+System.out.<span class="fn">println</span>(c1.<span class="fn">isSpeeding</span>() + <span class="st">" "</span> + c2.<span class="fn">isSpeeding</span>());`,
+        options: ["true true", "false true", "true false", "false false"],
+        correct: 1,
+        explain: "MAX_SPEED=120. c1 speed=100: 100>120 is false. c2 speed=150: 150>120 is true."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">interface</span> <span class="ty">Drawable</span> {
+    <span class="kw">void</span> <span class="fn">draw</span>();
+    <span class="kw">void</span> <span class="fn">resize</span>();
+}
+<span class="kw">class</span> <span class="ty">BadShape</span> <span class="kw">implements</span> <span class="ty">Drawable</span> {
+    <span class="kw">public void</span> <span class="fn">draw</span>() { System.out.<span class="fn">println</span>(<span class="st">"Drawing"</span>); }
+    <span class="cm"></span>
+}
+<span class="cm">// in main:</span>
+<span class="ty">BadShape</span> s = <span class="kw">new</span> <span class="fn">BadShape</span>();`,
+        options: ["Runtime error when resize() is called", "Compile error", "NullPointerException", "Works fine — resize does nothing"],
+        correct: 1,
+        explain: "A class that implements an interface must provide ALL methods, or be declared abstract. Missing resize() causes a compile error."
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: "Recursion",
+    icon: "🌀",
+    color: "#10b981",
+    tag: "L07",
+    questions: [
+      {
+        q:"What is the exact output?",
+        code:`<span class="kw">public static void</span> <span class="fn">count</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span>;
+    System.out.<span class="fn">print</span>(n + <span class="st">" "</span>);   <span class="cm"></span>
+    <span class="fn">count</span>(n - <span class="nm">1</span>);              <span class="cm"></span>
+}
+<span class="cm">// main: count(4);</span>`,
+        options:["1 2 3 4 ","4 3 2 1 ","4 3 2 1 0 ","0 1 2 3 4 "],
+        correct:1,
+        explain:'Each call prints n BEFORE recursing. count(4) prints 4, count(3) prints 3, count(2) prints 2, count(1) prints 1, count(0) returns. Output: "4 3 2 1 ".'
+      },
+      {
+        q:"What is the exact output?",
+        code:`<span class="kw">public static void</span> <span class="fn">count</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span>;
+    <span class="fn">count</span>(n - <span class="nm">1</span>);              <span class="cm"></span>
+    System.out.<span class="fn">print</span>(n + <span class="st">" "</span>);   <span class="cm"></span>
+}
+<span class="cm">// main: count(4);</span>`,
+        options:["4 3 2 1 ","1 2 3 4 ","0 1 2 3 4 ","4 3 2 1 0 "],
+        correct:1,
+        explain:'Each call recurses all the way down first, then prints on the way back (unwinding). count(0) returns silently. Then prints 1, 2, 3, 4. Output: "1 2 3 4 ".'
+      },
+      {
+        q:'What is printed when reverse("Java") is called?',
+        code:`<span class="kw">public static void</span> <span class="fn">reverse</span>(<span class="ty">String</span> s) {
+    <span class="kw">if</span> (s.<span class="fn">isEmpty</span>()) <span class="kw">return</span>;
+    <span class="fn">reverse</span>(s.<span class="fn">substring</span>(<span class="nm">1</span>));   <span class="cm"></span>
+    System.out.<span class="fn">print</span>(s.<span class="fn">charAt</span>(<span class="nm">0</span>)); <span class="cm"></span>
+}
+<span class="cm">// main: reverse("Java");</span>`,
+        options:["Java","avaJ","Jaav","aJva"],
+        correct:1,
+        explain:'The method recurses all the way to an empty string, then prints one character at a time while unwinding: first "a" (from "a"), then "v" (from "va"), then "a" (from "ava"), then "J" (from "Java"). Result: "avaJ".'
+      },
+      {
+        q:"What is the exact output of zigzag(3)?",
+        code:`<span class="kw">public static void</span> <span class="fn">zigzag</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span>;
+    System.out.<span class="fn">print</span>(n + <span class="st">" "</span>);   <span class="cm"></span>
+    <span class="fn">zigzag</span>(n - <span class="nm">1</span>);
+    System.out.<span class="fn">print</span>(n + <span class="st">" "</span>);   <span class="cm"></span>
+}
+<span class="cm">// main: zigzag(3);</span>`,
+        options:["3 2 1 ","1 2 3 ","3 2 1 1 2 3 ","1 2 3 3 2 1 "],
+        correct:2,
+        explain:'Each call prints n before and after the recursive call: zigzag(3): prints 3, calls zigzag(2), then prints 3. zigzag(2): prints 2, calls zigzag(1), then prints 2. zigzag(1): prints 1, calls zigzag(0), then prints 1. zigzag(0): returns.'
+      },
+      {
+        q:"What is the output of chain(1, 5)?",
+        code:`<span class="kw">public static void</span> <span class="fn">chain</span>(<span class="ty">int</span> i, <span class="ty">int</span> n) {
+    <span class="kw">if</span> (i > n) <span class="kw">return</span>;
+    System.out.<span class="fn">print</span>(i * i + <span class="st">" "</span>);
+    <span class="fn">chain</span>(i + <span class="nm">1</span>, n);
+}
+<span class="cm">// main: chain(1, 5);</span>`,
+        options:["1 2 3 4 5 ","1 4 9 16 25 ","2 4 8 16 32 ","0 1 4 9 16 "],
+        correct:1,
+        explain:'i goes 1,2,3,4,5. Each call prints i*i: 1,4,9,16,25. When i=6, 6>5 → return. Output: "1 4 9 16 25 ".'
+      },
+      {
+        q: "What is the final output?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">rec</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="kw">return</span> n + <span class="fn">rec</span>(n - <span class="nm">1</span>);
+}
+<span class="cm">// in main:</span>
+System.out.<span class="fn">println</span>(<span class="fn">rec</span>(<span class="nm">4</span>));`,
+        options: ["4", "6", "10", "24"],
+        correct: 2,
+        explain: "rec(4)=4+rec(3)=4+3+rec(2)=4+3+2+rec(1)=4+3+2+1+rec(0)=4+3+2+1+0=10."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">fact</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">1</span>;
+    <span class="kw">return</span> n * <span class="fn">fact</span>(n - <span class="nm">1</span>);
+}
+<span class="cm">// in main:</span>
+System.out.<span class="fn">println</span>(<span class="fn">fact</span>(<span class="nm">5</span>));`,
+        options: ["24", "60", "120", "720"],
+        correct: 2,
+        explain: "5×4×3×2×1×1 = 120. The base case: fact(0)=1."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">power</span>(<span class="ty">int</span> base, <span class="ty">int</span> exp) {
+    <span class="kw">if</span> (exp == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">1</span>;
+    <span class="kw">return</span> base * <span class="fn">power</span>(base, exp - <span class="nm">1</span>);
+}
+<span class="cm">// in main:</span>
+System.out.<span class="fn">println</span>(<span class="fn">power</span>(<span class="nm">3</span>, <span class="nm">4</span>));`,
+        options: ["12", "27", "64", "81"],
+        correct: 3,
+        explain: "3⁴ = 3×3×3×3 = 81. Each recursive call reduces exp by 1 until exp=0 returns 1."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">public static void</span> <span class="fn">countdown</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) { System.out.<span class="fn">println</span>(<span class="st">"Go!"</span>); <span class="kw">return</span>; }
+    System.out.<span class="fn">println</span>(n);
+    <span class="fn">countdown</span>(n - <span class="nm">1</span>);
+}
+<span class="cm">// in main:</span>
+<span class="fn">countdown</span>(<span class="nm">3</span>);`,
+        options: ["Go! 1 2 3", "3 2 1 Go!", "1 2 3 Go!", "3 2 1"],
+        correct: 1,
+        explain: "countdown(3) prints 3, then 2, then 1, then base case prints 'Go!'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">mystery</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n &lt;= <span class="nm">1</span>) <span class="kw">return</span> <span class="nm">1</span>;
+    <span class="kw">return</span> <span class="fn">mystery</span>(n - <span class="nm">1</span>) + <span class="fn">mystery</span>(n - <span class="nm">2</span>);
+}
+<span class="cm">// in main:</span>
+System.out.<span class="fn">println</span>(<span class="fn">mystery</span>(<span class="nm">5</span>));`,
+        options: ["5", "7", "8", "13"],
+        correct: 2,
+        explain: "Fibonacci-like: m(1)=1, m(2)=2, m(3)=3, m(4)=5, m(5)=8."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">public static void</span> <span class="fn">printDown</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span>;
+    System.out.<span class="fn">print</span>(n + <span class="st">" "</span>);
+    <span class="fn">printDown</span>(n - <span class="nm">1</span>);
+}
+<span class="cm">// in main:</span>
+<span class="fn">printDown</span>(<span class="nm">5</span>);`,
+        options: ["1 2 3 4 5 ", "5 4 3 2 1 ", "5 4 3 2 1 0 ", "0 1 2 3 4 5 "],
+        correct: 1,
+        explain: "Prints n BEFORE the recursive call → 5, 4, 3, 2, 1. Stops when n==0 (nothing printed for 0)."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">calc</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">1</span>) <span class="kw">return</span> <span class="nm">2</span>;
+    <span class="kw">return</span> <span class="fn">calc</span>(n - <span class="nm">1</span>) * <span class="nm">2</span>;
+}
+<span class="cm">// in main:</span>
+System.out.<span class="fn">println</span>(<span class="fn">calc</span>(<span class="nm">4</span>));`,
+        options: ["8", "16", "32", "2"],
+        correct: 1,
+        explain: "calc(1)=2, calc(2)=2×2=4, calc(3)=4×2=8, calc(4)=8×2=16."
+      },
+      {
+        q: "What is the full output?",
+        code: `<span class="kw">public static void</span> <span class="fn">test</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span>;
+    System.out.<span class="fn">print</span>(n + <span class="st">" "</span>);
+    <span class="fn">test</span>(n - <span class="nm">1</span>);
+    System.out.<span class="fn">print</span>(n + <span class="st">" "</span>);
+}
+<span class="cm">// in main:</span>
+<span class="fn">test</span>(<span class="nm">3</span>);`,
+        options: ["3 2 1 ", "3 2 1 3 2 1 ", "3 2 1 1 2 3 ", "1 2 3 3 2 1 "],
+        correct: 2,
+        explain: "Going down: prints 3,2,1. Base case returns. Going up (unwinding): prints 1,2,3 again."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">public static</span> <span class="ty">String</span> <span class="fn">repeat</span>(<span class="ty">String</span> s, <span class="ty">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="st">""</span>;
+    <span class="kw">return</span> s + <span class="fn">repeat</span>(s, n - <span class="nm">1</span>);
+}
+<span class="cm">// in main:</span>
+System.out.<span class="fn">println</span>(<span class="fn">repeat</span>(<span class="st">"ab"</span>, <span class="nm">3</span>));`,
+        options: ["ab", "abab", "ababab", "ababababab"],
+        correct: 2,
+        explain: "repeat('ab',3) = 'ab' + repeat('ab',2) = 'ab'+'ab'+'ab'+'' = 'ababab'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">public static</span> <span class="ty">int</span> <span class="fn">digitSum</span>(<span class="ty">int</span> n) {
+    <span class="kw">if</span> (n &lt; <span class="nm">10</span>) <span class="kw">return</span> n;
+    <span class="kw">return</span> n % <span class="nm">10</span> + <span class="fn">digitSum</span>(n / <span class="nm">10</span>);
+}
+<span class="cm">// in main:</span>
+System.out.<span class="fn">println</span>(<span class="fn">digitSum</span>(<span class="nm">456</span>));`,
+        options: ["456", "15", "45", "10"],
+        correct: 1,
+        explain: "digitSum(456)=6+digitSum(45)=6+5+digitSum(4)=6+5+4=15."
+      }
+    ]
+  },
+  {
+    id: 8,
+    title: "Working with Objects",
+    icon: "🔗",
+    color: "#f97316",
+    tag: "L08",
+    questions: [
+      {
+        q:"What is the output?",
+        code:`<span class="kw">class</span> <span class="ty">Token</span> {
+    <span class="ty">int</span> id;
+    <span class="kw">public</span> <span class="fn">Token</span>(<span class="ty">int</span> id){ <span class="kw">this</span>.id=id; }
+    <span class="kw">public boolean</span> <span class="fn">sameAs</span>(<span class="ty">Token</span> o){ <span class="kw">return</span> <span class="kw">this</span>.id == o.id; }
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Token</span> a = <span class="kw">new</span> <span class="fn">Token</span>(<span class="nm">10</span>);
+    <span class="ty">Token</span> b = <span class="kw">new</span> <span class="fn">Token</span>(<span class="nm">10</span>);
+    <span class="ty">Token</span> c = a;
+    System.out.<span class="fn">println</span>((a==b) + <span class="st">" "</span> + a.<span class="fn">sameAs</span>(b) + <span class="st">" "</span> + (a==c));
+}`,
+        options:["true true true","false true true","false false true","true false true"],
+        correct:1,
+        explain:"a==b: two different objects in memory → false. a.sameAs(b): compares id fields 10==10 → true. a==c: c=a is a reference copy, same object → true. Prints \"false true true\"."
+      },
+      {
+        q:"What is printed?",
+        code:`<span class="kw">class</span> <span class="ty">Box</span> { <span class="ty">int</span> val; <span class="kw">public</span> <span class="fn">Box</span>(<span class="ty">int</span> v){ val=v; } }
+
+<span class="kw">public static void</span> <span class="fn">process</span>(<span class="ty">Box</span> b) {
+    b.val = <span class="nm">99</span>;              <span class="cm"></span>
+    b = <span class="kw">new</span> <span class="fn">Box</span>(<span class="nm">0</span>);          <span class="cm"></span>
+    b.val = <span class="nm">777</span>;
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Box</span> x = <span class="kw">new</span> <span class="fn">Box</span>(<span class="nm">5</span>);
+    <span class="fn">process</span>(x);
+    System.out.<span class="fn">println</span>(x.val);
+}`,
+        options:["5","99","777","0"],
+        correct:1,
+        explain:"b.val=99 modifies the original object. Then b=new Box(0) only changes the LOCAL variable b — the caller's x still points to the original. x.val was set to 99 and stays 99."
+      },
+      {
+        q:"What does this copy-constructor trace print?",
+        code:`<span class="kw">class</span> <span class="ty">Point</span> {
+    <span class="ty">int</span> x, y;
+    <span class="kw">public</span> <span class="fn">Point</span>(<span class="ty">int</span> x, <span class="ty">int</span> y)   { <span class="kw">this</span>.x=x; <span class="kw">this</span>.y=y; }
+    <span class="kw">public</span> <span class="fn">Point</span>(<span class="ty">Point</span> other)     { <span class="kw">this</span>.x=other.x; <span class="kw">this</span>.y=other.y; }
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Point</span> p1 = <span class="kw">new</span> <span class="fn">Point</span>(<span class="nm">3</span>, <span class="nm">4</span>);
+    <span class="ty">Point</span> p2 = <span class="kw">new</span> <span class="fn">Point</span>(p1);    <span class="cm"></span>
+    p1.x = <span class="nm">100</span>;
+    System.out.<span class="fn">println</span>(p2.x + <span class="st">" "</span> + p2.y);
+}`,
+        options:["100 4","3 4","100 100","3 100"],
+        correct:1,
+        explain:"The copy constructor creates an independent object: p2.x=3, p2.y=4. Changing p1.x to 100 has no effect on p2 because they are separate objects. Prints \"3 4\"."
+      },
+      {
+        q:"What does the final println print?",
+        code:`<span class="kw">class</span> <span class="ty">Lamp</span> { <span class="ty">boolean</span> on = <span class="kw">false</span>; }
+
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Lamp</span> a = <span class="kw">new</span> <span class="fn">Lamp</span>();
+    <span class="ty">Lamp</span> b = a;
+    a.on = <span class="kw">true</span>;
+    b.on = <span class="kw">false</span>;
+    System.out.<span class="fn">println</span>(a.on);
+}`,
+        options:["true","false","null","Compile error"],
+        correct:1,
+        explain:"b=a means both variables reference the SAME Lamp. a.on=true sets it to true. b.on=false then sets the same field to false. a.on is false → prints false."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Box</span> { <span class="ty">int</span> size; }
+
+<span class="kw">public static void</span> <span class="fn">resize</span>(<span class="ty">Box</span> b) {
+    b.size = <span class="nm">50</span>;
+}
+<span class="cm">// in main:</span>
+<span class="ty">Box</span> myBox = <span class="kw">new</span> <span class="fn">Box</span>();
+myBox.size = <span class="nm">10</span>;
+<span class="fn">resize</span>(myBox);
+System.out.<span class="fn">println</span>(myBox.size);`,
+        options: ["10", "50", "0", "Compile error"],
+        correct: 1,
+        explain: "Objects are passed by reference. resize() modifies the actual object's size field → 50."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Point</span> {
+    <span class="ty">int</span> x, y;
+    <span class="kw">public</span> <span class="fn">Point</span>(<span class="ty">int</span> x, <span class="ty">int</span> y) { <span class="kw">this</span>.x = x; <span class="kw">this</span>.y = y; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Point</span> p1 = <span class="kw">new</span> <span class="fn">Point</span>(<span class="nm">3</span>, <span class="nm">4</span>);
+<span class="ty">Point</span> p2 = <span class="kw">new</span> <span class="fn">Point</span>(<span class="nm">3</span>, <span class="nm">4</span>);
+System.out.<span class="fn">println</span>(p1 == p2);`,
+        options: ["true", "false", "Compile error", "NullPointerException"],
+        correct: 1,
+        explain: "== compares memory addresses. p1 and p2 are two different objects. Even with same fields, addresses differ → false."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Counter</span> { <span class="ty">int</span> count = <span class="nm">0</span>; }
+<span class="cm">// in main:</span>
+<span class="ty">Counter</span> c1 = <span class="kw">new</span> <span class="fn">Counter</span>();
+<span class="ty">Counter</span> c2 = c1;
+c1.count = <span class="nm">10</span>;
+System.out.<span class="fn">println</span>(c2.count);`,
+        options: ["0", "10", "Compile error", "NullPointerException"],
+        correct: 1,
+        explain: "c2 = c1 is a reference copy — both point to the same object. Modifying c1.count changes what c2 sees → 10."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Rect</span> { <span class="ty">int</span> w, h; <span class="kw">public</span> <span class="fn">Rect</span>(<span class="ty">int</span> w, <span class="ty">int</span> h) { <span class="kw">this</span>.w=w; <span class="kw">this</span>.h=h; } }
+
+<span class="kw">public static</span> <span class="ty">Rect</span> <span class="fn">bigger</span>(<span class="ty">Rect</span> a, <span class="ty">Rect</span> b) {
+    <span class="kw">if</span> (a.w * a.h &gt;= b.w * b.h) <span class="kw">return</span> a;
+    <span class="kw">return</span> b;
+}
+<span class="cm">// in main:</span>
+<span class="ty">Rect</span> r1 = <span class="kw">new</span> <span class="fn">Rect</span>(<span class="nm">4</span>, <span class="nm">5</span>);
+<span class="ty">Rect</span> r2 = <span class="kw">new</span> <span class="fn">Rect</span>(<span class="nm">3</span>, <span class="nm">7</span>);
+<span class="ty">Rect</span> res = <span class="fn">bigger</span>(r1, r2);
+System.out.<span class="fn">println</span>(res.w + <span class="st">" "</span> + res.h);`,
+        options: ["4 5", "3 7", "7 3", "21 20"],
+        correct: 1,
+        explain: "r1 area=20, r2 area=21. r2 is bigger → 3 7."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Circle</span> {
+    <span class="ty">double</span> radius;
+    <span class="kw">public</span> <span class="fn">Circle</span>(<span class="ty">double</span> r)            { radius = r; }
+    <span class="kw">public</span> <span class="fn">Circle</span>(<span class="ty">Circle</span> c)            { radius = c.radius; } <span class="cm"></span>
+}
+<span class="cm">// in main:</span>
+<span class="ty">Circle</span> c1 = <span class="kw">new</span> <span class="fn">Circle</span>(<span class="nm">5.0</span>);
+<span class="ty">Circle</span> c2 = <span class="kw">new</span> <span class="fn">Circle</span>(c1);
+c1.radius = <span class="nm">10.0</span>;
+System.out.<span class="fn">println</span>(c2.radius);`,
+        options: ["10.0", "5.0", "0.0", "Compile error"],
+        correct: 1,
+        explain: "Copy constructor makes an independent copy. c2 has its own radius=5.0. Changing c1.radius to 10.0 doesn't affect c2."
+      },
+      {
+        q: "What is the final score?",
+        code: `<span class="kw">class</span> <span class="ty">Student</span> {
+    <span class="ty">int</span> score;
+    <span class="kw">public</span> <span class="fn">Student</span>(<span class="ty">int</span> s) { score = s; }
+}
+<span class="kw">public static void</span> <span class="fn">bonus</span>(<span class="ty">Student</span> s) { s.score += <span class="nm">10</span>; }
+<span class="cm">// in main:</span>
+<span class="ty">Student</span> st = <span class="kw">new</span> <span class="fn">Student</span>(<span class="nm">80</span>);
+<span class="fn">bonus</span>(st);
+<span class="fn">bonus</span>(st);
+System.out.<span class="fn">println</span>(st.score);`,
+        options: ["80", "90", "100", "70"],
+        correct: 2,
+        explain: "80 + 10 = 90 (first bonus), then 90 + 10 = 100 (second bonus). Object is modified in-place."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Dog</span> { <span class="ty">String</span> name; <span class="kw">public</span> <span class="fn">Dog</span>(<span class="ty">String</span> n) { name = n; } }
+<span class="cm">// in main:</span>
+<span class="ty">Dog</span> d1 = <span class="kw">new</span> <span class="fn">Dog</span>(<span class="st">"Rex"</span>);
+<span class="ty">Dog</span> d2 = d1;
+System.out.<span class="fn">println</span>(d1 == d2);`,
+        options: ["true", "false", "Compile error", "NullPointerException"],
+        correct: 0,
+        explain: "d2 = d1 makes d2 point to the same object as d1. Same address → == returns true."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Temp</span> {
+    <span class="ty">double</span> celsius;
+    <span class="kw">public</span> <span class="fn">Temp</span>(<span class="ty">double</span> c) { celsius = c; }
+    <span class="kw">public</span> <span class="ty">Temp</span> <span class="fn">add</span>(<span class="ty">Temp</span> other) {
+        <span class="kw">return new</span> <span class="fn">Temp</span>(<span class="kw">this</span>.celsius + other.celsius);
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Temp</span> t1 = <span class="kw">new</span> <span class="fn">Temp</span>(<span class="nm">20.0</span>);
+<span class="ty">Temp</span> t2 = <span class="kw">new</span> <span class="fn">Temp</span>(<span class="nm">15.0</span>);
+<span class="ty">Temp</span> t3 = t1.<span class="fn">add</span>(t2);
+System.out.<span class="fn">println</span>(t3.celsius);`,
+        options: ["20.0", "15.0", "35.0", "300.0"],
+        correct: 2,
+        explain: "add() creates a new Temp with celsius = 20.0 + 15.0 = 35.0."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Node</span> {
+    <span class="ty">int</span>  data;
+    <span class="ty">Node</span> next;
+    <span class="kw">public</span> <span class="fn">Node</span>(<span class="ty">int</span> d) { data = d; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Node</span> n = <span class="kw">new</span> <span class="fn">Node</span>(<span class="nm">5</span>);
+System.out.<span class="fn">println</span>(n.data + <span class="st">" "</span> + n.next);`,
+        options: ["5.0 null", "5 null", "NullPointerException", "Compile error"],
+        correct: 1,
+        explain: "data is set to 5 by constructor. next (a reference) defaults to null (never assigned). Prints '5 null'."
+      },
+      {
+        q: "What does this print?",
+        code: `<span class="kw">class</span> <span class="ty">Holder</span> { <span class="ty">int</span> value; <span class="kw">public</span> <span class="fn">Holder</span>(<span class="ty">int</span> v) { value = v; } }
+<span class="kw">public static void</span> <span class="fn">change</span>(<span class="ty">int</span> x, <span class="ty">Holder</span> h) {
+    x = <span class="nm">999</span>;
+    h.value = <span class="nm">999</span>;
+}
+<span class="cm">// in main:</span>
+<span class="ty">int</span> num = <span class="nm">5</span>;
+<span class="ty">Holder</span> holder = <span class="kw">new</span> <span class="fn">Holder</span>(<span class="nm">5</span>);
+<span class="fn">change</span>(num, holder);
+System.out.<span class="fn">println</span>(num + <span class="st">" "</span> + holder.value);`,
+        options: ["5 5", "999 999", "5 999", "999 5"],
+        correct: 2,
+        explain: "int (primitive) is passed by value → num stays 5. Holder (object) is passed by reference → value becomes 999."
+      }
+    ]
+  },
+  {
+    id: 9,
+    title: "Class Relationships",
+    icon: "🕸️",
+    color: "#84cc16",
+    tag: "L09",
+    questions: [
+      {
+        q:"What is the full output?",
+        code:`<span class="kw">class</span> <span class="ty">Team</span>   { <span class="ty">String</span> name; <span class="ty">int</span> size=<span class="nm">0</span>; <span class="kw">public</span> <span class="fn">Team</span>(<span class="ty">String</span> n){ name=n; } }
+<span class="kw">class</span> <span class="ty">Player</span> {
+    <span class="ty">String</span> name; <span class="ty">Team</span> team;
+    <span class="kw">public</span> <span class="fn">Player</span>(<span class="ty">String</span> n, <span class="ty">Team</span> t){ name=n; team=t; t.size++; }
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Team</span> t = <span class="kw">new</span> <span class="fn">Team</span>(<span class="st">"Lions"</span>);
+    <span class="kw">new</span> <span class="fn">Player</span>(<span class="st">"Ali"</span>, t);
+    <span class="kw">new</span> <span class="fn">Player</span>(<span class="st">"Sara"</span>, t);
+    <span class="kw">new</span> <span class="fn">Player</span>(<span class="st">"Ziad"</span>, t);
+    System.out.<span class="fn">println</span>(t.name + <span class="st">" : "</span> + t.size);
+}`,
+        options:["Lions : 0","Lions : 1","Lions : 3","Lions : 2"],
+        correct:2,
+        explain:"Each Player constructor increments t.size. Three players → t.size=3. Prints \"Lions : 3\"."
+      },
+      {
+        q:"What is the output?",
+        code:`<span class="kw">class</span> <span class="ty">Engine</span> { <span class="ty">int</span> hp; <span class="kw">public</span> <span class="fn">Engine</span>(<span class="ty">int</span> h){ hp=h; } }
+<span class="kw">class</span> <span class="ty">Car</span> {
+    <span class="ty">Engine</span> engine;
+    <span class="kw">public</span> <span class="fn">Car</span>(<span class="ty">int</span> hp){ engine = <span class="kw">new</span> <span class="fn">Engine</span>(hp); } <span class="cm"></span>
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Car</span> c1 = <span class="kw">new</span> <span class="fn">Car</span>(<span class="nm">150</span>);
+    <span class="ty">Car</span> c2 = <span class="kw">new</span> <span class="fn">Car</span>(<span class="nm">150</span>);
+    c1.engine.hp = <span class="nm">300</span>;
+    System.out.<span class="fn">println</span>(c2.engine.hp);
+}`,
+        options:["300","150","0","Compile error"],
+        correct:1,
+        explain:"Composition: each Car creates its OWN Engine inside the constructor — they are independent objects. Changing c1's engine does NOT affect c2's engine. c2.engine.hp stays 150."
+      },
+      {
+        q:"What is the output?",
+        code:`<span class="kw">class</span> <span class="ty">Product</span> {
+    <span class="ty">double</span> price;
+    <span class="kw">public</span> <span class="fn">Product</span>(<span class="ty">double</span> p){ price=p; }
+}
+<span class="kw">class</span> <span class="ty">Cart</span> {
+    <span class="ty">double</span> total = <span class="nm">0</span>;
+    <span class="kw">void</span> <span class="fn">add</span>(<span class="ty">Product</span> p){ total += p.price; }
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Cart</span> cart = <span class="kw">new</span> <span class="fn">Cart</span>();
+    cart.<span class="fn">add</span>(<span class="kw">new</span> <span class="fn">Product</span>(<span class="nm">12.5</span>));
+    cart.<span class="fn">add</span>(<span class="kw">new</span> <span class="fn">Product</span>(<span class="nm">7.5</span>));
+    cart.<span class="fn">add</span>(<span class="kw">new</span> <span class="fn">Product</span>(<span class="nm">5.0</span>));
+    System.out.<span class="fn">println</span>(cart.total);
+}`,
+        options:["12.5","20.0","25.0","7.5"],
+        correct:2,
+        explain:"12.5 + 7.5 + 5.0 = 25.0. Cart accumulates totals through association with Product objects passed as arguments."
+      },
+      {
+        q:"What is the output?",
+        code:`<span class="kw">class</span> <span class="ty">Address</span> { <span class="ty">String</span> city; <span class="kw">public</span> <span class="fn">Address</span>(<span class="ty">String</span> c){ city=c; } }
+<span class="kw">class</span> <span class="ty">Person</span>  {
+    <span class="ty">String</span> name; <span class="ty">Address</span> addr;
+    <span class="kw">public</span> <span class="fn">Person</span>(<span class="ty">String</span> n, <span class="ty">Address</span> a){ name=n; addr=a; }
+}
+<span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Address</span> home = <span class="kw">new</span> <span class="fn">Address</span>(<span class="st">"Cairo"</span>);
+    <span class="ty">Person</span>  p1   = <span class="kw">new</span> <span class="fn">Person</span>(<span class="st">"Aya"</span>, home);
+    <span class="ty">Person</span>  p2   = <span class="kw">new</span> <span class="fn">Person</span>(<span class="st">"Omar"</span>, home);
+    home.city = <span class="st">"Alex"</span>;
+    System.out.<span class="fn">println</span>(p1.addr.city + <span class="st">" "</span> + p2.addr.city);
+}`,
+        options:["Cairo Cairo","Alex Alex","Cairo Alex","Alex Cairo"],
+        correct:1,
+        explain:"Both p1 and p2 hold a reference to the SAME Address object (aggregation). Changing home.city='Alex' is reflected through both references → \"Alex Alex\"."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Pen</span> {
+    <span class="ty">String</span> color; <span class="kw">public</span> <span class="fn">Pen</span>(<span class="ty">String</span> c) { color = c; }
+    <span class="ty">String</span> <span class="fn">getColor</span>() { <span class="kw">return</span> color; }
+}
+<span class="kw">class</span> <span class="ty">Writer</span> {
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">write</span>(<span class="ty">Pen</span> pen) {
+        <span class="kw">return</span> <span class="st">"Writing with "</span> + pen.<span class="fn">getColor</span>() + <span class="st">" pen"</span>;
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Pen</span> p = <span class="kw">new</span> <span class="fn">Pen</span>(<span class="st">"blue"</span>);
+<span class="ty">Writer</span> w = <span class="kw">new</span> <span class="fn">Writer</span>();
+System.out.<span class="fn">println</span>(w.<span class="fn">write</span>(p));`,
+        options: ["Writing with pen", "blue", "Writing with blue pen", "Compile error"],
+        correct: 2,
+        explain: "Association: Writer uses Pen via method argument. write() returns 'Writing with blue pen'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Engine</span> { <span class="ty">int</span> hp; <span class="kw">public</span> <span class="fn">Engine</span>(<span class="ty">int</span> h) { hp = h; } }
+<span class="kw">class</span> <span class="ty">Car</span> {
+    <span class="ty">String</span> model; <span class="ty">Engine</span> engine;
+    <span class="kw">public</span> <span class="fn">Car</span>(<span class="ty">String</span> m, <span class="ty">Engine</span> e) { model = m; engine = e; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Engine</span> e = <span class="kw">new</span> <span class="fn">Engine</span>(<span class="nm">150</span>);
+<span class="ty">Car</span> car = <span class="kw">new</span> <span class="fn">Car</span>(<span class="st">"Sedan"</span>, e);
+e.hp = <span class="nm">200</span>;
+System.out.<span class="fn">println</span>(car.engine.hp);`,
+        options: ["150", "200", "0", "Compile error"],
+        correct: 1,
+        explain: "Aggregation: Car holds a reference to the Engine. Both e and car.engine point to the same object → 200."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Wheel</span> { <span class="ty">int</span> size; <span class="kw">public</span> <span class="fn">Wheel</span>(<span class="ty">int</span> s) { size = s; } }
+<span class="kw">class</span> <span class="ty">Bicycle</span> {
+    <span class="ty">Wheel</span> wheel;
+    <span class="kw">public</span> <span class="fn">Bicycle</span>(<span class="ty">int</span> wheelSize) {
+        wheel = <span class="kw">new</span> <span class="fn">Wheel</span>(wheelSize);
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Bicycle</span> b = <span class="kw">new</span> <span class="fn">Bicycle</span>(<span class="nm">26</span>);
+System.out.<span class="fn">println</span>(b.wheel.size);`,
+        options: ["0", "26", "Compile error", "NullPointerException"],
+        correct: 1,
+        explain: "Composition: Wheel is created inside Bicycle's constructor → owned by Bicycle. b.wheel.size = 26."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Product</span> {
+    <span class="ty">double</span> price; <span class="kw">public</span> <span class="fn">Product</span>(<span class="ty">double</span> p) { price = p; }
+    <span class="ty">double</span> <span class="fn">getPrice</span>() { <span class="kw">return</span> price; }
+}
+<span class="kw">class</span> <span class="ty">Cart</span> {
+    <span class="kw">private</span> <span class="ty">double</span> total = <span class="nm">0</span>;
+    <span class="kw">public void</span>   <span class="fn">add</span>(<span class="ty">Product</span> p) { total += p.<span class="fn">getPrice</span>(); }
+    <span class="kw">public</span> <span class="ty">double</span> <span class="fn">getTotal</span>()      { <span class="kw">return</span> total; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Cart</span> c = <span class="kw">new</span> <span class="fn">Cart</span>();
+c.<span class="fn">add</span>(<span class="kw">new</span> <span class="fn">Product</span>(<span class="nm">25.0</span>));
+c.<span class="fn">add</span>(<span class="kw">new</span> <span class="fn">Product</span>(<span class="nm">10.0</span>));
+c.<span class="fn">add</span>(<span class="kw">new</span> <span class="fn">Product</span>(<span class="nm">5.0</span>));
+System.out.<span class="fn">println</span>(c.<span class="fn">getTotal</span>());`,
+        options: ["25.0", "35.0", "40.0", "Compile error"],
+        correct: 2,
+        explain: "25.0 + 10.0 + 5.0 = 40.0."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Teacher</span>  { <span class="ty">String</span> name; <span class="kw">public</span> <span class="fn">Teacher</span>(<span class="ty">String</span> n) { name = n; } }
+<span class="kw">class</span> <span class="ty">Course</span>   {
+    <span class="ty">String</span> title; <span class="ty">Teacher</span> instructor;
+    <span class="kw">public</span> <span class="fn">Course</span>(<span class="ty">String</span> t, <span class="ty">Teacher</span> teacher) { title = t; instructor = teacher; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Teacher</span> t = <span class="kw">new</span> <span class="fn">Teacher</span>(<span class="st">"Dr. Smith"</span>);
+<span class="ty">Course</span> c1 = <span class="kw">new</span> <span class="fn">Course</span>(<span class="st">"Math"</span>, t);
+<span class="ty">Course</span> c2 = <span class="kw">new</span> <span class="fn">Course</span>(<span class="st">"Physics"</span>, t);
+t.name = <span class="st">"Prof. Smith"</span>;
+System.out.<span class="fn">println</span>(c1.instructor.name + <span class="st">" "</span> + c2.instructor.name);`,
+        options: ["Dr. Smith Dr. Smith", "Prof. Smith Dr. Smith", "Prof. Smith Prof. Smith", "Compile error"],
+        correct: 2,
+        explain: "Both courses hold a reference to the same Teacher object. Changing t.name changes what both see."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Heart</span> { <span class="ty">int</span> bpm; <span class="kw">public</span> <span class="fn">Heart</span>(<span class="ty">int</span> b) { bpm = b; } }
+<span class="kw">class</span> <span class="ty">Human</span> {
+    <span class="ty">String</span> name; <span class="ty">Heart</span> heart;
+    <span class="kw">public</span> <span class="fn">Human</span>(<span class="ty">String</span> n, <span class="ty">int</span> bpm) {
+        name = n; heart = <span class="kw">new</span> <span class="fn">Heart</span>(bpm);
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Human</span> h = <span class="kw">new</span> <span class="fn">Human</span>(<span class="st">"Bob"</span>, <span class="nm">72</span>);
+System.out.<span class="fn">println</span>(h.name + <span class="st">" "</span> + h.heart.bpm);`,
+        options: ["Bob 0", "null 72", "Bob 72", "NullPointerException"],
+        correct: 2,
+        explain: "Human's constructor creates a new Heart(72) and sets name='Bob'. Composition — Heart exists inside Human."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Wallet</span> {
+    <span class="ty">double</span> money; <span class="kw">public</span> <span class="fn">Wallet</span>(<span class="ty">double</span> m) { money = m; }
+    <span class="ty">boolean</span> <span class="fn">hasFunds</span>(<span class="ty">double</span> amt) { <span class="kw">return</span> money >= amt; }
+}
+<span class="kw">class</span> <span class="ty">Store</span> {
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">sell</span>(<span class="ty">Wallet</span> w, <span class="ty">double</span> price) {
+        <span class="kw">return</span> w.<span class="fn">hasFunds</span>(price) ? <span class="st">"Sold!"</span> : <span class="st">"Insufficient funds"</span>;
+    }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Wallet</span> w = <span class="kw">new</span> <span class="fn">Wallet</span>(<span class="nm">50.0</span>);
+<span class="ty">Store</span> s = <span class="kw">new</span> <span class="fn">Store</span>();
+System.out.<span class="fn">println</span>(s.<span class="fn">sell</span>(w, <span class="nm">30.0</span>));
+System.out.<span class="fn">println</span>(s.<span class="fn">sell</span>(w, <span class="nm">80.0</span>));`,
+        options: ["Sold!\nSold!", "Insufficient funds\nSold!", "Sold!\nInsufficient funds", "Compile error"],
+        correct: 2,
+        explain: "50 >= 30 → 'Sold!'. 50 >= 80 is false → 'Insufficient funds'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">CPU</span>    { <span class="ty">String</span> model; <span class="kw">public</span> <span class="fn">CPU</span>(<span class="ty">String</span> m) { model = m; } }
+<span class="kw">class</span> <span class="ty">Laptop</span> {
+    <span class="ty">CPU</span> cpu;
+    <span class="kw">public</span> <span class="fn">Laptop</span>(<span class="ty">String</span> cpuModel) { cpu = <span class="kw">new</span> <span class="fn">CPU</span>(cpuModel); }
+    <span class="ty">String</span> <span class="fn">getCpuModel</span>() { <span class="kw">return</span> cpu.model; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Laptop</span> lp = <span class="kw">new</span> <span class="fn">Laptop</span>(<span class="st">"Intel i7"</span>);
+System.out.<span class="fn">println</span>(lp.<span class="fn">getCpuModel</span>());`,
+        options: ["null", "Intel", "Intel i7", "Compile error"],
+        correct: 2,
+        explain: "Laptop creates a CPU('Intel i7') inside its constructor. getCpuModel() returns cpu.model = 'Intel i7'."
+      },
+      {
+        q: "What is the output?",
+        code: `<span class="kw">class</span> <span class="ty">Address</span> { <span class="ty">String</span> city; <span class="kw">public</span> <span class="fn">Address</span>(<span class="ty">String</span> c) { city = c; } }
+<span class="kw">class</span> <span class="ty">Company</span> {
+    <span class="ty">String</span> name; <span class="ty">Address</span> location;
+    <span class="kw">public</span> <span class="fn">Company</span>(<span class="ty">String</span> n, <span class="ty">Address</span> a) { name = n; location = a; }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Address</span> addr = <span class="kw">new</span> <span class="fn">Address</span>(<span class="st">"Cairo"</span>);
+<span class="ty">Company</span> comp = <span class="kw">new</span> <span class="fn">Company</span>(<span class="st">"TechCo"</span>, addr);
+System.out.<span class="fn">println</span>(comp.name + <span class="st">" in "</span> + comp.location.city);`,
+        options: ["TechCo in null", "TechCo in Cairo", "null in Cairo", "Compile error"],
+        correct: 1,
+        explain: "Company stores a reference to addr which has city='Cairo'. Prints 'TechCo in Cairo'."
+      },
+      {
+        q: "What is printed?",
+        code: `<span class="kw">class</span> <span class="ty">Engine</span> { <span class="ty">int</span> power; <span class="kw">public</span> <span class="fn">Engine</span>(<span class="ty">int</span> p) { power = p; } }
+<span class="kw">class</span> <span class="ty">Car</span> {
+    <span class="ty">Engine</span> engine;
+    <span class="kw">public</span> <span class="fn">Car</span>(<span class="ty">int</span> power) { engine = <span class="kw">new</span> <span class="fn">Engine</span>(power); }
+}
+<span class="cm">// in main:</span>
+<span class="ty">Car</span> car1 = <span class="kw">new</span> <span class="fn">Car</span>(<span class="nm">100</span>);
+<span class="ty">Car</span> car2 = <span class="kw">new</span> <span class="fn">Car</span>(<span class="nm">200</span>);
+System.out.<span class="fn">println</span>(car1.engine.power + <span class="st">" "</span> + car2.engine.power);`,
+        options: ["100 100", "200 200", "100 200", "200 100"],
+        correct: 2,
+        explain: "Each Car creates its own new Engine in the constructor (composition). car1.engine.power=100, car2.engine.power=200."
+      }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+const state = {
+  answers: {},    // "L-Q" : index chosen
+  revealed: {},   // "L-Q" : true
+};
+
+function getKey(lIdx, qIdx) { return `${lIdx}-${qIdx}`; }
+
+function totalAnswered() { return Object.keys(state.answers).length; }
+function totalCorrect()  {
+  return Object.entries(state.answers).filter(([k, v]) => {
+    const [li, qi] = k.split('-').map(Number);
+    return lectures[li].questions[qi].correct === v;
+  }).length;
+}
+
+function lectureScore(li) {
+  const qs = lectures[li].questions;
+  let correct = 0, answered = 0;
+  qs.forEach((q, qi) => {
+    const k = getKey(li, qi);
+    if (state.answers[k] !== undefined) {
+      answered++;
+      if (state.answers[k] === q.correct) correct++;
+    }
+  });
+  return { correct, answered, total: qs.length };
+}
+
+// ═══════════════════════════════════════════════════
+//  BUILD UI
+// ═══════════════════════════════════════════════════
+function buildSidebar() {
+  const nav = document.getElementById('lecture-nav');
+  nav.innerHTML = '';
+  lectures.forEach((lec, li) => {
+    const sc = lectureScore(li);
+    const btn = document.createElement('button');
+    btn.className = 'lec-btn' + (li === 0 ? ' active' : '');
+    btn.id = `nav-${li}`;
+    btn.innerHTML = `
+      <span class="lec-num">${li+1}</span>
+      <span style="flex:1;font-size:.72rem">${lec.title}</span>
+      <span class="lec-score" id="lec-score-${li}">${sc.answered}/${sc.total}</span>
+    `;
+    btn.onclick = () => showLecture(li);
+    nav.appendChild(btn);
+  });
+}
+
+function buildMain() {
+  const main = document.getElementById('main-content');
+  main.innerHTML = '';
+  lectures.forEach((lec, li) => {
+    const section = document.createElement('div');
+    section.className = 'lecture-section' + (li === 0 ? ' active' : '');
+    section.id = `section-${li}`;
+
+    const sc = lectureScore(li);
+    section.innerHTML = `
+      <div class="lecture-header">
+        <div class="lecture-icon" style="background:linear-gradient(135deg,${lec.color}22,${lec.color}44);border:1px solid ${lec.color}44">${lec.icon}</div>
+        <div class="lecture-meta">
+          <div class="lecture-num-label">Lecture ${li+1} of 9</div>
+          <div class="lecture-main-title">${lec.title}</div>
+          <div class="lecture-tag" style="background:${lec.color}22;color:${lec.color};border:1px solid ${lec.color}44">${lec.tag} · Code Trace · 10 Questions</div>
+          <div class="lecture-progress-bar"><div class="lecture-progress-fill" id="lec-prog-${li}" style="width:${sc.answered*10}%"></div></div>
+          <div class="lecture-stats">
+            <div class="lecture-stat" id="lec-stat-${li}"><strong>${sc.answered}</strong> answered · <strong id="lec-corr-${li}">${sc.correct}</strong> correct</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    lec.questions.forEach((q, qi) => {
+      const key = getKey(li, qi);
+      const chosen = state.answers[key];
+      const revealed = state.revealed[key];
+
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      card.id = `card-${li}-${qi}`;
+
+      let opts = q.options.map((opt, oi) => {
+        let cls = 'option-btn';
+        if (revealed) {
+          cls += ' disabled';
+          if (oi === q.correct) cls += ' correct';
+          else if (oi === chosen && chosen !== q.correct) cls += ' wrong';
+        } else if (oi === chosen) cls += ' selected';
+        return `<button class="${cls}" onclick="choose(${li},${qi},${oi})">
+          <span class="opt-letter">${'ABCD'[oi]}</span>
+          <span>${opt}</span>
+        </button>`;
+      }).join('');
+
+      let fbHtml = '';
+      if (revealed) {
+        const correct = chosen === q.correct;
+        fbHtml = `<div class="feedback show ${correct ? 'correct-fb' : 'wrong-fb'}">
+          <span class="feedback-icon">${correct ? '✅' : '❌'}</span>
+          <span><strong>${correct ? 'Correct!' : 'Wrong.'}</strong> ${q.explain}</span>
+        </div>`;
+      }
+
+      let statusCls = 'q-status', statusTxt = 'Unanswered';
+      if (revealed) {
+        if (chosen === q.correct) { statusCls += ' answered-correct'; statusTxt = '✓ Correct'; }
+        else { statusCls += ' answered-wrong'; statusTxt = '✗ Incorrect'; }
+      } else if (chosen !== undefined) { statusTxt = 'Selected — click to reveal'; }
+
+      card.innerHTML = `
+        <div class="q-header">
+          <div class="q-num">Q${qi+1}</div>
+          <div class="q-text">${q.q}</div>
+        </div>
+        <div class="code-block">${q.code}</div>
+        <div class="options">${opts}</div>
+        ${fbHtml}
+        <div class="q-footer">
+          <span class="${statusCls}" id="status-${li}-${qi}">${statusTxt}</span>
+          ${revealed && chosen !== q.correct ? `<span style="font-size:.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace">Correct: ${'ABCD'[q.correct]}) ${q.options[q.correct]}</span>` : ''}
+        </div>
+      `;
+      section.appendChild(card);
+    });
+
+    main.appendChild(section);
+  });
+}
+
+function showLecture(li) {
+  document.querySelectorAll('.lecture-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.lec-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`section-${li}`).classList.add('active');
+  document.getElementById(`nav-${li}`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════
+//  INTERACTIONS
+// ═══════════════════════════════════════════════════
+function choose(li, qi, oi) {
+  const key = getKey(li, qi);
+  if (state.revealed[key]) return;
+
+  if (state.answers[key] === undefined) {
+    // First click: select
+    state.answers[key] = oi;
+    // Auto-reveal
+    state.revealed[key] = true;
+    refreshCard(li, qi);
+    updateStats();
+  }
+}
+
+function refreshCard(li, qi) {
+  const key = getKey(li, qi);
+  const q = lectures[li].questions[qi];
+  const chosen = state.answers[key];
+  const revealed = state.revealed[key];
+  const card = document.getElementById(`card-${li}-${qi}`);
+  if (!card) return;
+
+  // Update option buttons
+  const opts = card.querySelectorAll('.option-btn');
+  opts.forEach((btn, oi) => {
+    btn.className = 'option-btn';
+    if (revealed) {
+      btn.classList.add('disabled');
+      if (oi === q.correct) btn.classList.add('correct');
+      else if (oi === chosen && chosen !== q.correct) btn.classList.add('wrong');
+    } else if (oi === chosen) btn.classList.add('selected');
+    btn.onclick = () => choose(li, qi, oi);
+  });
+
+  // Feedback
+  let fb = card.querySelector('.feedback');
+  if (!fb) { fb = document.createElement('div'); fb.className = 'feedback'; card.querySelector('.options').after(fb); }
+  if (revealed) {
+    const correct = chosen === q.correct;
+    fb.className = `feedback show ${correct ? 'correct-fb' : 'wrong-fb'}`;
+    fb.innerHTML = `<span class="feedback-icon">${correct ? '✅' : '❌'}</span><span><strong>${correct ? 'Correct!' : 'Wrong.'}</strong> ${q.explain}</span>`;
+  } else fb.className = 'feedback';
+
+  // Status
+  const st = document.getElementById(`status-${li}-${qi}`);
+  if (st) {
+    st.className = 'q-status';
+    let txt = 'Unanswered';
+    if (revealed) {
+      if (chosen === q.correct) { st.classList.add('answered-correct'); txt = '✓ Correct'; }
+      else { st.classList.add('answered-wrong'); txt = '✗ Incorrect'; }
+    } else if (chosen !== undefined) txt = 'Selected';
+    st.textContent = txt;
+  }
+}
+
+function updateStats() {
+  const ans = totalAnswered(), cor = totalCorrect();
+  const pct = ans > 0 ? Math.round(cor / ans * 100) : 0;
+  const total = 90;
+
+  document.getElementById('hdr-answered').textContent = ans;
+  document.getElementById('hdr-correct').textContent = cor;
+  document.getElementById('hdr-score').textContent = pct + '%';
+  document.getElementById('sidebar-score').textContent = pct + '%';
+  document.getElementById('sidebar-progress').style.width = (ans / total * 100) + '%';
+  document.getElementById('global-progress').style.width = (ans / total * 100) + '%';
+
+  lectures.forEach((lec, li) => {
+    const sc = lectureScore(li);
+    const el = document.getElementById(`lec-score-${li}`);
+    if (el) el.textContent = `${sc.answered}/${sc.total}`;
+    const prog = document.getElementById(`lec-prog-${li}`);
+    if (prog) prog.style.width = (sc.answered / sc.total * 100) + '%';
+    const stat = document.getElementById(`lec-stat-${li}`);
+    if (stat) stat.innerHTML = `<strong>${sc.answered}</strong> answered · <strong id="lec-corr-${li}">${sc.correct}</strong> correct`;
+  });
+
+  if (ans === total) showFinalResults();
+}
+
+function showFinalResults() {
+  setTimeout(() => {
+    const cor = totalCorrect(), pct = Math.round(cor / 90 * 100);
+    document.getElementById('final-score-pct').textContent = pct + '%';
+    document.getElementById('final-badge').textContent = pct >= 90 ? '🏆' : pct >= 70 ? '🎓' : pct >= 50 ? '📚' : '💪';
+    document.getElementById('final-msg').textContent =
+      pct >= 90 ? 'Outstanding! You\'re fully prepared for the final exam!' :
+      pct >= 70 ? 'Great work! Review the lectures you missed and you\'re ready.' :
+      pct >= 50 ? 'Good effort! Focus on your weaker areas.' : 'Keep practicing — review each lecture carefully.';
+
+    const grid = document.getElementById('lec-results-grid');
+    grid.innerHTML = lectures.map((lec, li) => {
+      const sc = lectureScore(li);
+      const p = Math.round(sc.correct / sc.total * 100);
+      const col = p >= 70 ? 'var(--correct)' : p >= 50 ? 'var(--accent)' : 'var(--wrong)';
+      return `<div class="lec-result-card">
+        <div class="lrc-name">${lec.tag}: ${lec.title.slice(0,16)}</div>
+        <div class="lrc-score" style="color:${col}">${sc.correct}/${sc.total}</div>
+        <div class="lrc-bar"><div class="lrc-fill" style="width:${p}%;background:${col}"></div></div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('quiz-layout').style.display = 'none';
+    document.getElementById('final-results').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 600);
+}
+
+// ═══════════════════════════════════════════════════
+//  LIFECYCLE
+// ═══════════════════════════════════════════════════
+function startQuiz() {
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('quiz-layout').style.display = 'grid';
+  buildSidebar();
+  buildMain();
+  window.scrollTo({ top: 0 });
+}
+
+function restartQuiz() {
+  state.answers = {};
+  state.revealed = {};
+  document.getElementById('final-results').classList.remove('show');
+  document.getElementById('quiz-layout').style.display = 'grid';
+  buildSidebar();
+  buildMain();
+  updateStats();
+  showLecture(0);
+  window.scrollTo({ top: 0 });
+}
+</script>
+</body>
+</html>
